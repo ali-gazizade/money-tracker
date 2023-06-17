@@ -5,7 +5,7 @@ class User {
   name!: string;
 
   @prop({ required: true, unique: true })
-  email!: string;
+  username!: string;
 
   @prop({ required: true })
   password!: string;
