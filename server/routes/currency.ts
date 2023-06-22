@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import CurrencyModel, { Currency } from '../models/currency';
 import { body, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 
 const router = Router();
 
@@ -14,13 +15,13 @@ router.get('/list', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/', [
+router.post('/create', [
   body('name').notEmpty().withMessage('Name is required'),
   body('isDefault').notEmpty().withMessage('isDefault is required')
 ],
  async (req: Request, res: Response) => {
   try {
-    const { name, isDefault } = req.body;
+    let { name, isDefault } = req.body;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -28,12 +29,21 @@ router.post('/', [
     }
 
     // Check if a currency with the same name already exists
-    const existingCurrency = await CurrencyModel.findOne({ name, active: 1 }).exec();
+    const existingCurrency = await CurrencyModel.findOne({ name, active: true }).exec();
     if (existingCurrency) {
       return res.status(409).json({ error: 'Currency already exists' });
     }
 
-    const currency = new CurrencyModel({ name, isDefault, active: 1 });
+    // Check if there is a default one
+    const defaultCurrency = await CurrencyModel.findOne({ isDefault: true, active: true }).exec();
+    if (isDefault === true && defaultCurrency) {
+      defaultCurrency.isDefault = false;
+      await defaultCurrency.save();
+    } else if (!defaultCurrency) {
+      isDefault = true;
+    }
+
+    const currency = new CurrencyModel({ name, isDefault, active: true });
     await currency.save();
 
     res.status(201).json(currency);
@@ -43,19 +53,49 @@ router.post('/', [
   }
 });
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/update/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, isDefault, active } = req.body;
+    let { name, isDefault, active } = req.body;
 
-    const currency = await CurrencyModel.findOne({ id, active: 1 });
+    if (active === false) {
+      isDefault = false;
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    const currency = await CurrencyModel.findOne({ _id: id, active: true });
     if (!currency) {
       return res.status(404).json({ error: 'Currency not found' });
     }
 
-    currency.name = name;
-    currency.isDefault = isDefault;
-    currency.active = active;
+    // Check for default
+    if (typeof isDefault !== 'undefined') {
+      const defaultCurrency = await CurrencyModel.findOne({ isDefault: true, active: true }).exec();
+
+      if (isDefault === true && defaultCurrency) {
+        defaultCurrency.isDefault = true;
+        defaultCurrency.save();
+      } else if (isDefault === false && !defaultCurrency) {
+        // There must be at least 1 default, so nothing will happen here
+        isDefault = true;
+      }
+    }
+
+    if (typeof name !== 'undefined') {
+      currency.name = name;
+    }
+
+    if (typeof isDefault !== 'undefined') {
+      currency.isDefault = isDefault;
+    }
+
+    if (typeof active !== 'undefined') {
+      currency.active = active;
+    }
+
     await currency.save();
 
     res.status(200).json(currency);

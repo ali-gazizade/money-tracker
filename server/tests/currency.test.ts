@@ -26,11 +26,11 @@ describe('Currency API', () => {
     });
   });
 
-  describe('POST /currency', () => {
+  describe('POST /currency/create', () => {
     it('should create a new currency', async () => {
       const newCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
 
-      const response = await request(app).post('/currency').send(newCurrency);
+      const response = await request(app).post('/currency/create').send(newCurrency);
 
       expect(response.status).toBe(201);
       expect(response.body.name).toBe(newCurrency.name);
@@ -40,12 +40,15 @@ describe('Currency API', () => {
       expect(currency).not.toBeNull();
       expect(currency?.name).toBe(newCurrency.name);
       expect(currency?.isDefault).toBe(newCurrency.isDefault);
+
+      const currencies = await CurrencyModel.find({ active: true });
+      expect(currencies.length).toBe(4);
     });
 
     it('should return 400 if required fields are missing', async () => {
       const invalidCurrency: Partial<Currency> = { isDefault: false };
 
-      const response = await request(app).post('/currency').send(invalidCurrency);
+      const response = await request(app).post('/currency/create').send(invalidCurrency);
 
       expect(response.status).toBe(400);
       expect(response.body.errors).toHaveLength(1);
@@ -58,11 +61,14 @@ describe('Currency API', () => {
     it('should switch default true to false, if there are 2 defaults', async () => {
       const newCurrency: Partial<Currency> = { name: 'GBP', isDefault: true };
 
-      const response = await request(app).post('/currency').send(newCurrency);
+      const response = await request(app).post('/currency/create').send(newCurrency);
 
       expect(response.status).toBe(201);
       expect(response.body.name).toBe(newCurrency.name);
-      expect(response.body.isDefault).toBe(!newCurrency.isDefault);
+      expect(response.body.isDefault).toBe(newCurrency.isDefault);
+
+      const defaultCurrencies = await CurrencyModel.find({ isDefault: true, active: true }).exec();
+      expect(defaultCurrencies.length).toBe(1);
     });
 
     it('should switch default false to true, if there are no defaults', async () => {
@@ -70,7 +76,7 @@ describe('Currency API', () => {
       
       const newCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
 
-      const response = await request(app).post('/currency').send(newCurrency);
+      const response = await request(app).post('/currency/create').send(newCurrency);
 
       expect(response.status).toBe(201);
       expect(response.body.name).toBe(newCurrency.name);
@@ -78,45 +84,66 @@ describe('Currency API', () => {
     });
   });
 
-  describe('PUT /currency/:id', () => {
+  describe('PUT /currency/update/:id', () => {
     it('should update a currency', async () => {
-      const currency = await CurrencyModel.findOne().exec();
+      const currency = await CurrencyModel.findOne({ isDefault: false }).exec();
 
       expect(currency).toBeTruthy();
 
       const updatedCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
 
-      const response = await request(app).put(`/currency/${currency?._id}`).send(updatedCurrency);
+      const id = currency?._id?.toString();
+
+      const response = await request(app).put(`/currency/update/${id}`).send(updatedCurrency);
+
+      expect(response.status).toBe(200);
+
+      const updatedCurrencyInDB = await CurrencyModel.findById(id);
+      expect(updatedCurrencyInDB).toBeTruthy();
+      expect(updatedCurrencyInDB?.name).toBe(updatedCurrency.name);
+      expect(updatedCurrencyInDB?.isDefault).toBe(updatedCurrency.isDefault);
+    });
+
+    it('should change it to default', async () => {
+      const currency = await CurrencyModel.findOne().exec();
+
+      expect(currency).toBeTruthy();
+
+      const updatedCurrency: Partial<Currency> = { isDefault: true };
+
+      const response = await request(app).put(`/currency/update/${currency?._id}`).send(updatedCurrency);
 
       expect(response.status).toBe(200);
 
       const updatedCurrencyInDB = await CurrencyModel.findById(currency?._id);
       expect(updatedCurrencyInDB).toBeTruthy();
-      expect(updatedCurrencyInDB?.name).toBe(updatedCurrency.name);
+      expect(updatedCurrencyInDB?.name).toBeTruthy();
       expect(updatedCurrencyInDB?.isDefault).toBe(updatedCurrency.isDefault);
     });
 
     it('should return 404 if currency is not found', async () => {
       const updatedCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
 
-      const response = await request(app).put('/currency/inv').send(updatedCurrency);
+      const response = await request(app).put('/currency/update/inv').send(updatedCurrency);
 
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('Currency not found');
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe('Invalid ID');
     });
 
     it('should remove a currency', async () => {
-      const currency = await CurrencyModel.findOne().exec();
+      const currency = await CurrencyModel.findOne({ active: true }).exec();
 
       expect(currency).toBeTruthy();
 
+      const id = currency?._id?.toString();
+
       const updatedCurrency: Partial<Currency> = { active: false };
 
-      const response = await request(app).put(`/currency/${currency?._id}`).send(updatedCurrency);
+      const response = await request(app).put(`/currency/update/${id}`).send(updatedCurrency);
 
       expect(response.status).toBe(200);
 
-      const updatedCurrencyInDB = await CurrencyModel.findById(currency?._id);
+      const updatedCurrencyInDB = await CurrencyModel.findById(id);
       expect(updatedCurrencyInDB).toBeTruthy();
       expect(updatedCurrencyInDB?.active).toBe(false);
     });
