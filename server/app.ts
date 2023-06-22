@@ -2,9 +2,12 @@ import express, { Request, Response } from 'express';
 import dashboardRouter from './routes/dashboard';
 import userRouter from './routes/user';
 import authRouter from './routes/auth';
+import currencyRouter from './routes/currency';
 import connectDB from './db';
 
 const app = express();
+
+app.use(express.json());
 
 connectDB();
 
@@ -13,8 +16,13 @@ app.use('/static', express.static('public'));
 app.use('/dashboard', dashboardRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
+app.use('/currency', currencyRouter);
 
 const port = 3010;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
+
+export default app;
