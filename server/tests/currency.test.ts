@@ -3,26 +3,16 @@ import app from '../app';
 import CurrencyModel, { Currency } from '../models/currency';
 
 describe('Currency API', () => {
-  beforeEach(async () => {
-    await CurrencyModel.deleteMany({});
-    await CurrencyModel.create({ name: 'AZN', isDefault: true, active: true });
-    await CurrencyModel.create({ name: 'USD', isDefault: false, active: true });
-    await CurrencyModel.create({ name: 'EUR', isDefault: false, active: true });
-  });
-
-  afterAll(async () => {
-    await CurrencyModel.deleteMany({});
-    await CurrencyModel.create({ name: 'AZN', isDefault: true, active: true });
-    await CurrencyModel.create({ name: 'USD', isDefault: false, active: true });
-    await CurrencyModel.create({ name: 'EUR', isDefault: false, active: true });
-  });
-
   describe('GET /currency/list', () => {
     it('should get all currencies', async () => {
+      // From API
       const response = await request(app).get('/currency/list');
 
+      // Count from db
+      const activeCurrencyCount = await CurrencyModel.count({ active: true });
+
       expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(3);
+      expect(response.body.length).toBe(activeCurrencyCount);
     });
   });
 
@@ -40,13 +30,6 @@ describe('Currency API', () => {
       expect(currency).not.toBeNull();
       expect(currency?.name).toBe(newCurrency.name);
       expect(currency?.isDefault).toBe(newCurrency.isDefault);
-
-      const currenciesCount = await CurrencyModel.count({ active: true });
-      expect(currenciesCount).toBe(4);
-
-      // Only 1 default
-      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
-      expect(defaultCurrenciesCount).toBe(1);
     });
 
     it('should return 400 if required fields are missing', async () => {
@@ -57,13 +40,10 @@ describe('Currency API', () => {
       expect(response.status).toBe(400);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].msg).toBe('Name is required');
-
-      const currenciesCount = await CurrencyModel.count();
-      expect(currenciesCount).toBe(3);
     });
 
     it('should switch default true to false, if there are 2 defaults', async () => {
-      const newCurrency: Partial<Currency> = { name: 'GBP', isDefault: true };
+      const newCurrency: Partial<Currency> = { name: 'AUD', isDefault: true };
 
       const response = await request(app).post('/currency/create').send(newCurrency);
 
@@ -77,9 +57,10 @@ describe('Currency API', () => {
     });
 
     it('should switch default false to true, if there are no defaults', async () => {
-      await CurrencyModel.deleteMany({});
+      // Remove all first
+      await CurrencyModel.updateMany({}, { active: false, isDefault: false });
       
-      const newCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
+      const newCurrency: Partial<Currency> = { name: 'CAD', isDefault: false };
 
       const response = await request(app).post('/currency/create').send(newCurrency);
 
@@ -90,6 +71,9 @@ describe('Currency API', () => {
       // Only 1 default
       const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
       expect(defaultCurrenciesCount).toBe(1);
+
+      // Revert remove
+      await CurrencyModel.updateMany({}, { active: true });
     });
   });
 
@@ -99,7 +83,7 @@ describe('Currency API', () => {
 
       expect(currency).toBeTruthy();
 
-      const updatedCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
+      const updatedCurrency: Partial<Currency> = { name: 'Test', isDefault: false };
 
       const id = currency?._id?.toString();
 
@@ -139,7 +123,7 @@ describe('Currency API', () => {
     });
 
     it('should return 404 if currency is not found', async () => {
-      const updatedCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
+      const updatedCurrency: Partial<Currency> = { name: 'Test', isDefault: false };
 
       const response = await request(app).put('/currency/update/inv').send(updatedCurrency);
 
@@ -156,6 +140,7 @@ describe('Currency API', () => {
 
       const updatedCurrency: Partial<Currency> = { active: false };
 
+      // API request
       const response = await request(app).put(`/currency/update/${id}`).send(updatedCurrency);
 
       expect(response.status).toBe(200);

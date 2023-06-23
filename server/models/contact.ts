@@ -1,6 +1,7 @@
 import { prop, getModelForClass } from '@typegoose/typegoose';
+import { Document } from 'mongoose';
 
-class Contact {
+class Contact extends Document {
   @prop({ required: true })
   name!: string;
 

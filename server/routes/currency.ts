@@ -76,8 +76,8 @@ router.put('/update/:id', async (req: Request, res: Response) => {
       const defaultCurrency = await CurrencyModel.findOne({ isDefault: true, active: true }).exec();
 
       if (isDefault === true && defaultCurrency) {
-        defaultCurrency.isDefault = true;
-        defaultCurrency.save();
+        defaultCurrency.isDefault = false;
+        await defaultCurrency.save();
       } else if (isDefault === false && !defaultCurrency) {
         // There must be at least 1 default, so nothing will happen here
         isDefault = true;
