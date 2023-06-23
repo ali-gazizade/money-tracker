@@ -98,6 +98,16 @@ router.put('/update/:id', async (req: Request, res: Response) => {
 
     await currency.save();
 
+    // If the default currency removed then make 1 default
+    const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+    if (defaultCurrenciesCount === 0) {
+      const anyCurrency = await CurrencyModel.findOne({ active: true }).exec();
+      if (anyCurrency) {
+        anyCurrency.isDefault = true;
+        await anyCurrency.save();
+      }
+    }
+
     res.status(200).json(currency);
   } catch (error) {
     console.error('Error updating currency:', error);

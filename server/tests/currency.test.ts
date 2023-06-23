@@ -41,8 +41,12 @@ describe('Currency API', () => {
       expect(currency?.name).toBe(newCurrency.name);
       expect(currency?.isDefault).toBe(newCurrency.isDefault);
 
-      const currencies = await CurrencyModel.find({ active: true });
-      expect(currencies.length).toBe(4);
+      const currenciesCount = await CurrencyModel.count({ active: true });
+      expect(currenciesCount).toBe(4);
+
+      // Only 1 default
+      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+      expect(defaultCurrenciesCount).toBe(1);
     });
 
     it('should return 400 if required fields are missing', async () => {
@@ -54,8 +58,8 @@ describe('Currency API', () => {
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].msg).toBe('Name is required');
 
-      const currencies = await CurrencyModel.find();
-      expect(currencies).toHaveLength(3);
+      const currenciesCount = await CurrencyModel.count();
+      expect(currenciesCount).toBe(3);
     });
 
     it('should switch default true to false, if there are 2 defaults', async () => {
@@ -67,8 +71,9 @@ describe('Currency API', () => {
       expect(response.body.name).toBe(newCurrency.name);
       expect(response.body.isDefault).toBe(newCurrency.isDefault);
 
-      const defaultCurrencies = await CurrencyModel.find({ isDefault: true, active: true }).exec();
-      expect(defaultCurrencies.length).toBe(1);
+      // Only 1 default
+      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+      expect(defaultCurrenciesCount).toBe(1);
     });
 
     it('should switch default false to true, if there are no defaults', async () => {
@@ -81,6 +86,10 @@ describe('Currency API', () => {
       expect(response.status).toBe(201);
       expect(response.body.name).toBe(newCurrency.name);
       expect(response.body.isDefault).toBe(!newCurrency.isDefault);
+
+      // Only 1 default
+      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+      expect(defaultCurrenciesCount).toBe(1);
     });
   });
 
@@ -102,6 +111,10 @@ describe('Currency API', () => {
       expect(updatedCurrencyInDB).toBeTruthy();
       expect(updatedCurrencyInDB?.name).toBe(updatedCurrency.name);
       expect(updatedCurrencyInDB?.isDefault).toBe(updatedCurrency.isDefault);
+
+      // Only 1 default
+      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+      expect(defaultCurrenciesCount).toBe(1);
     });
 
     it('should change it to default', async () => {
@@ -119,6 +132,10 @@ describe('Currency API', () => {
       expect(updatedCurrencyInDB).toBeTruthy();
       expect(updatedCurrencyInDB?.name).toBeTruthy();
       expect(updatedCurrencyInDB?.isDefault).toBe(updatedCurrency.isDefault);
+
+      // Only 1 default
+      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+      expect(defaultCurrenciesCount).toBe(1);
     });
 
     it('should return 404 if currency is not found', async () => {
@@ -146,6 +163,10 @@ describe('Currency API', () => {
       const updatedCurrencyInDB = await CurrencyModel.findById(id);
       expect(updatedCurrencyInDB).toBeTruthy();
       expect(updatedCurrencyInDB?.active).toBe(false);
+
+      // Only 1 default
+      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
+      expect(defaultCurrenciesCount).toBe(1);
     });
   });
 });
