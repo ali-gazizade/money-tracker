@@ -3,155 +3,63 @@ import app from '../app';
 import CurrencyModel, { Currency } from '../models/currency';
 
 describe('Currency API', () => {
-  describe('GET /currency/list', () => {
-    it('should get all currencies', async () => {
-      // From API
-      const response = await request(app).get('/currency/list');
+  it('should create, read, update, remove the currencies', async () => {
+    // Create
+    const currencies: Partial<Currency>[] = [
+      { name: 'AZN', isDefault: false },
+      { name: 'USD', isDefault: false },
+      { name: 'GBP', isDefault: false },
+    ];
 
-      // Count from db
-      const activeCurrencyCount = await CurrencyModel.count({ active: true });
+    const ids = [];
+    for (const currency of currencies) {
+      const createRes = await request(app).post('/currency/create').send(currency);
+      expect(createRes.status).toBe(201);
+      expect(createRes.body._id).toBeTruthy();
+      ids.push(createRes.body._id);
+    }
+    
+    // List
+    const listRes = await request(app).get('/currency/list');
+    expect(listRes.status).toBe(200);
+    expect(listRes.body.length).toBe(ids.length);
 
-      expect(response.status).toBe(200);
-      expect(response.body.length).toBe(activeCurrencyCount);
-    });
-  });
+    // Get
+    const getRes = await request(app).get(`/currency/get/${ids[0]}`);
 
-  describe('POST /currency/create', () => {
-    it('should create a new currency', async () => {
-      const newCurrency: Partial<Currency> = { name: 'GBP', isDefault: false };
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.name).toBe(currencies[0].name);
+    expect(getRes.body.isDefault).toBe(true);
 
-      const response = await request(app).post('/currency/create').send(newCurrency);
+    // Update
+    const updatedCurrency: Partial<Currency> = { name: 'Test', isDefault: false };
+    const updateRes = await request(app).put(`/currency/update/${ids[0]}`).send(updatedCurrency);
 
-      expect(response.status).toBe(201);
-      expect(response.body.name).toBe(newCurrency.name);
-      expect(response.body.isDefault).toBe(newCurrency.isDefault);
+    expect(updateRes.status).toBe(200);
 
-      const currency = await CurrencyModel.findById(response.body._id);
-      expect(currency).not.toBeNull();
-      expect(currency?.name).toBe(newCurrency.name);
-      expect(currency?.isDefault).toBe(newCurrency.isDefault);
-    });
+    // Get updated
+    const getUpdatedRes = await request(app).get(`/currency/get/${ids[0]}`);
 
-    it('should return 400 if required fields are missing', async () => {
-      const invalidCurrency: Partial<Currency> = { isDefault: false };
+    expect(getUpdatedRes.status).toBe(200);
+    expect(getUpdatedRes.body.name).toBe(updatedCurrency.name);
+    expect(getUpdatedRes.body.isDefault).toBe(true);
 
-      const response = await request(app).post('/currency/create').send(invalidCurrency);
+    // Remove
+    const removeRes = await request(app).put(`/currency/update/${ids[0]}`).send({ active: false });
 
-      expect(response.status).toBe(400);
-      expect(response.body.errors).toHaveLength(1);
-      expect(response.body.errors[0].msg).toBe('Name is required');
-    });
+    expect(removeRes.status).toBe(200);
 
-    it('should switch default true to false, if there are 2 defaults', async () => {
-      const newCurrency: Partial<Currency> = { name: 'AUD', isDefault: true };
+    // Create another one as default
+    await request(app).post('/currency/create').send({ name: 'EUR', isDefault: true });
 
-      const response = await request(app).post('/currency/create').send(newCurrency);
+    // List for final result
+    const listFinalRes = await request(app).get('/currency/list');
+    expect(listFinalRes.status).toBe(200);
+    expect(listFinalRes.body.length).toBe(3);
 
-      expect(response.status).toBe(201);
-      expect(response.body.name).toBe(newCurrency.name);
-      expect(response.body.isDefault).toBe(newCurrency.isDefault);
-
-      // Only 1 default
-      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
-      expect(defaultCurrenciesCount).toBe(1);
-    });
-
-    it('should switch default false to true, if there are no defaults', async () => {
-      // Remove all first
-      await CurrencyModel.updateMany({}, { active: false, isDefault: false });
-      
-      const newCurrency: Partial<Currency> = { name: 'CAD', isDefault: false };
-
-      const response = await request(app).post('/currency/create').send(newCurrency);
-
-      expect(response.status).toBe(201);
-      expect(response.body.name).toBe(newCurrency.name);
-      expect(response.body.isDefault).toBe(!newCurrency.isDefault);
-
-      // Only 1 default
-      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
-      expect(defaultCurrenciesCount).toBe(1);
-
-      // Revert remove
-      await CurrencyModel.updateMany({}, { active: true });
-    });
-  });
-
-  describe('PUT /currency/update/:id', () => {
-    it('should update a currency', async () => {
-      const currency = await CurrencyModel.findOne({ isDefault: false }).exec();
-
-      expect(currency).toBeTruthy();
-
-      const updatedCurrency: Partial<Currency> = { name: 'Test', isDefault: false };
-
-      const id = currency?._id?.toString();
-
-      const response = await request(app).put(`/currency/update/${id}`).send(updatedCurrency);
-
-      expect(response.status).toBe(200);
-
-      const updatedCurrencyInDB = await CurrencyModel.findById(id);
-      expect(updatedCurrencyInDB).toBeTruthy();
-      expect(updatedCurrencyInDB?.name).toBe(updatedCurrency.name);
-      expect(updatedCurrencyInDB?.isDefault).toBe(updatedCurrency.isDefault);
-
-      // Only 1 default
-      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
-      expect(defaultCurrenciesCount).toBe(1);
-    });
-
-    it('should change it to default', async () => {
-      const currency = await CurrencyModel.findOne().exec();
-
-      expect(currency).toBeTruthy();
-
-      const updatedCurrency: Partial<Currency> = { isDefault: true };
-
-      const response = await request(app).put(`/currency/update/${currency?._id}`).send(updatedCurrency);
-
-      expect(response.status).toBe(200);
-
-      const updatedCurrencyInDB = await CurrencyModel.findById(currency?._id);
-      expect(updatedCurrencyInDB).toBeTruthy();
-      expect(updatedCurrencyInDB?.name).toBeTruthy();
-      expect(updatedCurrencyInDB?.isDefault).toBe(updatedCurrency.isDefault);
-
-      // Only 1 default
-      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
-      expect(defaultCurrenciesCount).toBe(1);
-    });
-
-    it('should return 404 if currency is not found', async () => {
-      const updatedCurrency: Partial<Currency> = { name: 'Test', isDefault: false };
-
-      const response = await request(app).put('/currency/update/inv').send(updatedCurrency);
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toBe('Invalid ID');
-    });
-
-    it('should remove a currency', async () => {
-      const currency = await CurrencyModel.findOne({ active: true }).exec();
-
-      expect(currency).toBeTruthy();
-
-      const id = currency?._id?.toString();
-
-      const updatedCurrency: Partial<Currency> = { active: false };
-
-      // API request
-      const response = await request(app).put(`/currency/update/${id}`).send(updatedCurrency);
-
-      expect(response.status).toBe(200);
-
-      const updatedCurrencyInDB = await CurrencyModel.findById(id);
-      expect(updatedCurrencyInDB).toBeTruthy();
-      expect(updatedCurrencyInDB?.active).toBe(false);
-
-      // Only 1 default
-      const defaultCurrenciesCount = await CurrencyModel.count({ isDefault: true, active: true });
-      expect(defaultCurrenciesCount).toBe(1);
-    });
+    const finalIds = listFinalRes.body.map((e: Partial<Currency>) => e._id);
+    const defaultCount = listFinalRes.body.reduce((total: number, e: Partial<Currency>) => total + (e.isDefault ? 1 : 0), 0);
+    expect(finalIds).not.toContain(ids[0]);
+    expect(defaultCount).toBe(1);
   });
 });

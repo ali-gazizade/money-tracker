@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 
 const router = Router();
 
+// Currencies list
 router.get('/list', async (req: Request, res: Response) => {
   try {
     const currencies = await CurrencyModel.find({ active: true });
@@ -15,6 +16,7 @@ router.get('/list', async (req: Request, res: Response) => {
   }
 });
 
+// Create a new currency
 router.post('/create', [
   body('name').notEmpty().withMessage('Name is required'),
   body('isDefault').notEmpty().withMessage('isDefault is required')
@@ -53,6 +55,29 @@ router.post('/create', [
   }
 });
 
+// Get the currency
+router.get('/get/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+    
+    const currency: Currency | null = await CurrencyModel.findById(id);
+
+    if (!currency) {
+      return res.status(404).json({ error: 'Currency not found' });
+    }
+
+    return res.status(200).json(currency);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update the currency
 router.put('/update/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
