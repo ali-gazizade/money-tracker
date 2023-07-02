@@ -18,7 +18,7 @@
   "scripts": {
     "start": "ts-node ./app.ts",
     "dev": "nodemon ./app.ts",
-    "test": "jest --runInBand"
+    "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
