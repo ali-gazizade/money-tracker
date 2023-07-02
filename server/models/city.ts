@@ -6,7 +6,7 @@ class City extends Document {
   name!: string;
 
   @prop({ required: true })
-  country_name!: string;
+  countryName!: string;
 
   @prop({ required: true })
   active!: boolean;

@@ -4,6 +4,7 @@ import userRouter from './routes/user';
 import authRouter from './routes/auth';
 import currencyRouter from './routes/currency';
 import walletRouter from './routes/wallet';
+import cityRouter from './routes/city';
 import connectDB from './db';
 
 const app = express();
@@ -19,6 +20,7 @@ app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/currency', currencyRouter);
 app.use('/wallet', walletRouter);
+app.use('/city', cityRouter);
 
 const port = 3010;
 if (process.env.NODE_ENV !== 'test') {

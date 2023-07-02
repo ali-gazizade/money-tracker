@@ -117,6 +117,14 @@ router.put('/update/:id', async (req: Request, res: Response) => {
       currency.active = active;
     }
 
+    // Check if the same currency already exists
+    if (active !== false && name) {
+      const existingCurrency = await CurrencyModel.findOne({ name: currency.name, active: true }).exec();
+      if (existingCurrency) {
+        return res.status(409).json({ error: 'Currency already exists' });
+      }
+    }
+
     await currency.save();
 
     // If the default currency removed then make 1 default
