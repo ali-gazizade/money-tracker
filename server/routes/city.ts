@@ -9,8 +9,34 @@ const router = Router();
 
 router.get('/list', async (req: MyRequest, res: Response) => {
   try {
-    const cities = await CityModel.find({ user: req.user, active: true });
-    res.status(200).json(cities.map(e => cityAssembler(e)));
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const skipAmount = (page - 1) * limit;
+
+    const query = { user: req.user, active: true };
+
+    const cities = await CityModel.find(query)
+      .skip(skipAmount)
+      .limit(limit);
+
+    const totalCount = await CityModel.countDocuments(query);
+
+    res.status(200).json({
+      totalPages: Math.ceil(totalCount / limit),
+      cities: cities.map(e => cityAssembler(e))
+    });
+  } catch (error) {
+    console.error('Error retrieving cities:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/country_list', async (req: MyRequest, res: Response) => {
+  try {
+    const countries = await CityModel.distinct('countryName', { user: req.user, active: true });
+
+    res.status(200).json(countries);
   } catch (error) {
     console.error('Error retrieving cities:', error);
     res.status(500).json({ error: 'Internal server error' });
