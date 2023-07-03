@@ -1,14 +1,16 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
+import { MyRequest } from '../customs/express';
 import CityModel, { City } from '../models/city';
 import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
+import cityAssembler from '../assemblers/city';
 
 const router = Router();
 
-router.get('/list', async (req: Request, res: Response) => {
+router.get('/list', async (req: MyRequest, res: Response) => {
   try {
-    const cities = await CityModel.find({ active: true });
-    res.status(200).json(cities);
+    const cities = await CityModel.find({ user: req.user, active: true });
+    res.status(200).json(cities.map(e => cityAssembler(e)));
   } catch (error) {
     console.error('Error retrieving cities:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -19,7 +21,7 @@ router.post('/create', [
   body('name').notEmpty().withMessage('name is required'),
   body('countryName').notEmpty().withMessage('countryName is required')
 ],
- async (req: Request, res: Response) => {
+ async (req: MyRequest, res: Response) => {
   try {
     let { name, countryName } = req.body;
 
@@ -29,22 +31,22 @@ router.post('/create', [
     }
 
     // Check if a city with the same name already exists
-    const existingCity = await CityModel.findOne({ name, countryName, active: true }).exec();
+    const existingCity = await CityModel.findOne({ name, countryName, user: req.user, active: true }).exec();
     if (existingCity) {
       return res.status(409).json({ error: 'City already exists' });
     }
 
-    const city = new CityModel({ name, countryName, active: true });
+    const city = new CityModel({ name, countryName, user: req.user, active: true });
     await city.save();
 
-    res.status(201).json(city);
+    res.status(201).json(cityAssembler(city));
   } catch (error) {
     console.error('Error creating city:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.get('/get/:id', async (req: Request, res: Response) => {
+router.get('/get/:id', async (req: MyRequest, res: Response) => {
   const { id } = req.params;
 
   try {
@@ -52,20 +54,20 @@ router.get('/get/:id', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid ID' });
     }
     
-    const city: City | null = await CityModel.findById(id);
+    const city: City | null = await CityModel.findOne({ _id: id, user: req.user, active: true });
 
     if (!city) {
       return res.status(404).json({ error: 'City not found' });
     }
 
-    return res.status(200).json(city);
+    return res.status(200).json(cityAssembler(city));
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.put('/update/:id', async (req: Request, res: Response) => {
+router.put('/update/:id', async (req: MyRequest, res: Response) => {
   try {
     const { id } = req.params;
     let { name, countryName, active } = req.body;
@@ -74,7 +76,7 @@ router.put('/update/:id', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid ID' });
     }
 
-    const city = await CityModel.findOne({ _id: id, active: true });
+    const city = await CityModel.findOne({ _id: id, user: req.user, active: true });
     if (!city) {
       return res.status(404).json({ error: 'City not found' });
     }
@@ -96,6 +98,7 @@ router.put('/update/:id', async (req: Request, res: Response) => {
       const existingCity = await CityModel.findOne({
         name: city.name,
         countryName: city.countryName,
+        user: req.user,
         active: true
       }).exec();
       if (existingCity) {
@@ -105,7 +108,7 @@ router.put('/update/:id', async (req: Request, res: Response) => {
 
     await city.save();
 
-    res.status(200).json(city);
+    res.status(200).json(cityAssembler(city));
   } catch (error) {
     console.error('Error updating city:', error);
     res.status(500).json({ error: 'Internal server error' });

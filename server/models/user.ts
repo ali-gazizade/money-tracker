@@ -15,3 +15,5 @@ class User extends Document {
 const UserModel = getModelForClass(User);
 
 export default UserModel;
+
+export { User };

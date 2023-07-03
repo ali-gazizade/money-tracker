@@ -1,7 +1,8 @@
-import express, { Request, Response } from 'express';
+import express, { Response } from 'express';
+import { MyRequest } from '../customs/express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import UserModel from '../models/user';
 
 const router = express.Router();
@@ -12,7 +13,7 @@ router.post('/register_first', [
   body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 ],
-async (req: Request, res: Response) => {
+async (req: MyRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -50,7 +51,7 @@ router.post('/login', [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').notEmpty().withMessage('Password is required'),
 ],
-async (req: Request, res: Response) => {
+async (req: MyRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -72,7 +73,9 @@ async (req: Request, res: Response) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user.id }, 'your-secret-key');
+    const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY as string);
+
+    res.cookie('token', token, { httpOnly: true });
 
     res.json({ token });
   } catch (error) {

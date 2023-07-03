@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express';
+import express, { Response } from 'express';
+import { MyRequest } from '../customs/express';
 import UserModel from '../models/user';
 
 const router = express.Router();
 
-// GET /users
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: MyRequest, res: Response) => {
   try {
     const users = await UserModel.find().exec();
     res.json(users);
@@ -13,9 +13,8 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// POST /users
 // Todo add validations
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: MyRequest, res: Response) => {
   const { name, username, password } = req.body;
 
   // Validate the request body
@@ -32,8 +31,7 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /users/:id
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: MyRequest, res: Response) => {
   const userId = req.params.id;
 
   try {

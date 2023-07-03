@@ -1,8 +1,8 @@
 import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
 import { Amount } from './amount';
-import { Document } from 'mongoose';
+import BaseModel from './base';
 
-class Wallet extends Document {
+class Wallet extends BaseModel {
   @prop({ required: true })
   name!: string;
 
