@@ -2,9 +2,9 @@ import { Ref, prop } from '@typegoose/typegoose';
 import { Document } from 'mongoose';
 import { User } from './user';
 
-class BaseModel extends Document {
+class BaseDocument extends Document {
   @prop({ ref: () => User, required: true })
   user!: Ref<User>;
 }
 
-export default BaseModel;
+export default BaseDocument;

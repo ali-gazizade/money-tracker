@@ -1,7 +1,7 @@
 import { prop, getModelForClass } from '@typegoose/typegoose';
-import BaseModel from './base';
+import BaseDocument from './base';
 
-class City extends BaseModel {
+class City extends BaseDocument {
   @prop({ required: true })
   name!: string;
 
