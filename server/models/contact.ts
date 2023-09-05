@@ -5,7 +5,7 @@ class Contact extends BaseDocument {
   @prop({ required: true })
   name!: string;
 
-  @prop({ required: true })
+  @prop({ default: true })
   active!: boolean;
 }
 

@@ -8,7 +8,7 @@ class City extends BaseDocument {
   @prop({ required: true })
   countryName!: string;
 
-  @prop({ required: true })
+  @prop({ default: true })
   active!: boolean;
 }
 

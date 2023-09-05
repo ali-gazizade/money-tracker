@@ -6,6 +6,7 @@ import currencyRouter from './routes/currency';
 import walletRouter from './routes/wallet';
 import cityRouter from './routes/city';
 import contactRouter from './routes/contact';
+import expenseRouter from './routes/expense';
 import connectDB from './db';
 import auth from './middlewares/auth';
 import dotenv from 'dotenv';
@@ -29,6 +30,7 @@ app.use('/currency', auth, currencyRouter);
 app.use('/wallet', auth, walletRouter);
 app.use('/city', auth, cityRouter);
 app.use('/contact', auth, contactRouter);
+app.use('/expense', auth, expenseRouter);
 
 const port = 3010;
 if (process.env.NODE_ENV !== 'test') {
