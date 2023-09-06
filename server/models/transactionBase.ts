@@ -3,7 +3,7 @@ import BaseDocument from './base';
 import { Amount } from './amount';
 import { City } from './city';
 
-class Transaction extends BaseDocument {
+class TransactionBase extends BaseDocument {
   @prop({ ref: () => Amount, required: true })
   amount!: Ref<Amount>;
 
@@ -17,8 +17,8 @@ class Transaction extends BaseDocument {
   description!: string;
 }
 
-const TransactionModel = getModelForClass(Transaction);
+const TransactionBaseModel = getModelForClass(TransactionBase);
 
-export default TransactionModel;
+export default TransactionBaseModel;
 
-export { Transaction };
+export { TransactionBase };

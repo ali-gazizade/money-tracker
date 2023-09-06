@@ -4,19 +4,19 @@ import { TransactionBase } from './transactionBase';
 import { Wallet } from './wallet';
 import { Contact } from './contact';
 
-class Expense extends BaseDocument {
+class Income extends BaseDocument {
   @prop({ ref: () => TransactionBase, required: true })
   transactionBase!: Ref<TransactionBase>;
 
-  @prop({ ref: () => Wallet, required: true })
-  from!: Ref<Wallet>;
-
   @prop({ ref: () => Contact, required: true })
-  to!: Ref<Contact>;
+  from!: Ref<Contact>;
+
+  @prop({ ref: () => Wallet, required: true })
+  to!: Ref<Wallet>;
 }
 
-const ExpenseModel = getModelForClass(Expense);
+const IncomeModel = getModelForClass(Income);
 
-export default ExpenseModel;
+export default IncomeModel;
 
-export { Expense };
+export { Income };

@@ -6,6 +6,7 @@ import WalletModel from "../models/wallet";
 import ContactModel from "../models/contact";
 import CityModel from "../models/city";
 import UserModel from "../models/user";
+import mongoose from 'mongoose';
 
 beforeAll(async () => {
   const credentials = {
@@ -55,4 +56,8 @@ beforeEach(async () => {
 
   await CityModel.create({ name: 'Baku', countryName: 'Azerbaijan', user: user?._id });
   await CityModel.create({ name: 'Sheki', countryName: 'Azerbaijan', user: user?._id });
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
 });

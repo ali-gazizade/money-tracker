@@ -3,28 +3,28 @@ import { Expense } from '../models/expense';
 const expenseAssembler = (expense: Expense) => {
   return {
     _id: expense._id,
-    contact: {
-      _id: expense.contact._id,
-      name: expense.contact.name
+    to: {
+      _id: expense.to._id,
+      name: expense.to.name
     },
-    wallet: {
-      _id: expense.wallet._id,
-      name: expense.wallet.name
+    from: {
+      _id: expense.from._id,
+      name: expense.from.name
     },
     amount: {
-      value: expense.transaction.amount.value,
+      value: expense.transactionBase.amount.value,
       currency: {
-        _id: expense.transaction.amount.currency._id,
-        name: expense.transaction.amount.currency.name,
+        _id: expense.transactionBase.amount.currency._id,
+        name: expense.transactionBase.amount.currency.name,
       }
     },
     city: {
-      _id: expense.transaction.city._id,
-      name: expense.transaction.city.name,
-      countryName: expense.transaction.city.countryName
+      _id: expense.transactionBase.city._id,
+      name: expense.transactionBase.city.name,
+      countryName: expense.transactionBase.city.countryName
     },
-    happenedAt: expense.transaction.happenedAt,
-    description: expense.transaction.description
+    happenedAt: expense.transactionBase.happenedAt,
+    description: expense.transactionBase.description
   };
 };
 
