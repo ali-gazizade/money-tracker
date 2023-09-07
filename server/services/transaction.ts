@@ -7,11 +7,9 @@ import CurrencyModel, { Currency } from "../models/currency";
 import AmountModel from "../models/amount";
 import TransactionBaseModel, { TransactionBase } from "../models/transactionBase";
 import ExpenseModel, { Expense } from "../models/expense";
-import expenseAssembler from "../assemblers/expense";
+import transactionAssembler from "../assemblers/transaction";
 import IncomeModel, { Income } from "../models/income";
 import TransferModel, { Transfer } from "../models/transfer";
-import incomeAssembler from "../assemblers/income";
-import transferAssembler from "../assemblers/transfer";
 
 interface Properties {
   body: Body;
@@ -134,10 +132,6 @@ class Transaction {
       ? ExpenseModel
       : (this.type === Type.Income) ? IncomeModel
       : TransferModel;
-    const assembler = (this.type === Type.Expense)
-      ? expenseAssembler
-      : (this.type === Type.Income) ? incomeAssembler
-      : transferAssembler;
 
     const savedTransaction = await (new Model({
       transactionBase: this.transactionBase?._id,
@@ -168,7 +162,7 @@ class Transaction {
     }
 
     return {
-      result: assembler(foundTransaction)
+      result: transactionAssembler(foundTransaction)
     };
   }
 }

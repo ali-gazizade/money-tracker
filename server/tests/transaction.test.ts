@@ -182,4 +182,19 @@ describe('Expense', () => {
       expect(transferCountAfter).toBe(transferCountBefore + 1);
     });
   });
+
+  describe('GET /transaction/list', () => {
+    it('should list the last transactions with pagination', async () => {
+      const trBaseCount = await TransactionBaseModel.count({ user: global.userId });
+      const limit = 10;
+      const lastPage = Math.ceil(trBaseCount / limit);
+
+      const response = await request(app)
+        .get(`/transaction/list?page=${lastPage}&limit=${limit}`)
+        .set('Cookie', `token=${global.token}`);
+
+      expect(response.body.transactions.length).toBe(trBaseCount % limit || limit);
+      expect(response.body.totalPages).toBe(lastPage);
+    })
+  });
 });

@@ -3,6 +3,12 @@ import { MyRequest } from '../customs/express';
 import { body, validationResult } from 'express-validator';
 import Service, { Type } from '../services/transaction';
 import { User } from '../models/user';
+import TransactionBaseModel from '../models/transactionBase';
+import transactionAssembler from '../assemblers/transaction';
+import ExpenseModel from '../models/expense';
+import IncomeModel from '../models/income';
+import TransferModel from '../models/transfer';
+import moment from 'moment';
 
 const router = express.Router();
 
@@ -47,6 +53,60 @@ router.post('/create/:type', [
 
     res.status(201).json(newExpense.result);
   } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+router.get('/list', async (req: MyRequest, res: Response) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const skipAmount = (page - 1) * limit;
+
+    const query = { user: req.user };
+
+    const transactionBases = await TransactionBaseModel.find(query)
+      .skip(skipAmount)
+      .limit(limit);
+
+    const population = [
+      {
+        path: 'transactionBase',
+        populate: [
+          {
+            path: 'amount',
+            populate: { path: 'currency' }
+          },
+          { path: 'city' },
+        ]
+      },
+      { path: 'from' },
+      { path: 'to' }
+    ]
+
+    const transactionBaseIds = transactionBases.map(e => e._id);
+    const expenses = await ExpenseModel.find({
+      transactionBase: { $in: transactionBaseIds }
+    }).populate(population);
+    const incomes = await IncomeModel.find({
+      transactionBase: { $in: transactionBaseIds }
+    }).populate(population);
+    const transfers = await TransferModel.find({
+      transactionBase: { $in: transactionBaseIds }
+    }).populate(population);
+    const transactions = [...expenses, ...incomes, ...transfers].sort((a, b) =>
+      (+moment(b.transactionBase.happenedAt).format('X')) - (+moment(a.transactionBase.happenedAt).format('X'))
+    );
+
+    const totalCount = await TransactionBaseModel.countDocuments(query);
+
+    res.status(200).json({
+      totalPages: Math.ceil(totalCount / limit),
+      transactions: transactions.map(e => transactionAssembler(e))
+    });
+  } catch (error) {
+    console.error('Error retrieving transactions:', error);
     res.status(500).json({ error });
   }
 });

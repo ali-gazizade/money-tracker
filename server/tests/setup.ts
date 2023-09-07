@@ -18,11 +18,14 @@ beforeAll(async () => {
     .post('/auth/login')
     .send(credentials);
 
+  const user = await UserModel.findOne({ username: credentials.username });
+
   const tokenCookie = response.header['set-cookie'];
   if (tokenCookie) {
     const tokenMatch = tokenCookie[0].match(/token=([^;]*)/);
     if (tokenMatch) {
       global.token = tokenMatch[1];
+      global.userId = user?._id;
     } else {
       throw new Error('No "token" cookie found in the response.');
     }
@@ -32,30 +35,30 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  const user = await UserModel.findOne({ username: 'test@example.com' });
+  // const user = await UserModel.findOne({ username: 'test@example.com' });
 
-  await WalletModel.deleteMany({ user: user?._id });
-  await AmountModel.deleteMany({ user: user?._id });
-  await CurrencyModel.deleteMany({ user: user?._id });
-  await ContactModel.deleteMany({ user: user?._id });
+  // await WalletModel.deleteMany({ user: user?._id });
+  // await AmountModel.deleteMany({ user: user?._id });
+  // await CurrencyModel.deleteMany({ user: user?._id });
+  // await ContactModel.deleteMany({ user: user?._id });
 
-  const currency1 = await CurrencyModel.create({ name: 'AZN', isDefault: true, active: true, user: user?._id });
-  const currency2 = await CurrencyModel.create({ name: 'USD', isDefault: false, active: true, user: user?._id });
+  // const currency1 = await CurrencyModel.create({ name: 'AZN', isDefault: true, active: true, user: user?._id });
+  // const currency2 = await CurrencyModel.create({ name: 'USD', isDefault: false, active: true, user: user?._id });
 
-  const amount1 = await AmountModel.create({ value: '148.00', currency: currency1._id, user: user?._id });
-  const amount2 = await AmountModel.create({ value: '21.50', currency: currency2._id, user: user?._id });
-  const amount3 = await AmountModel.create({ value: '152.00', currency: currency2._id, user: user?._id });
+  // const amount1 = await AmountModel.create({ value: '148.00', currency: currency1._id, user: user?._id });
+  // const amount2 = await AmountModel.create({ value: '21.50', currency: currency2._id, user: user?._id });
+  // const amount3 = await AmountModel.create({ value: '152.00', currency: currency2._id, user: user?._id });
 
-  await WalletModel.create({ name: 'Wallet 1', firstTimeAmounts: [amount1, amount2], user: user?._id });
-  await WalletModel.create({ name: 'Wallet 2', firstTimeAmounts: [amount3], user: user?._id });
-  await WalletModel.create({ name: 'Wallet 3', firstTimeAmounts: [], user: user?._id });
+  // await WalletModel.create({ name: 'Wallet 1', firstTimeAmounts: [amount1, amount2], user: user?._id });
+  // await WalletModel.create({ name: 'Wallet 2', firstTimeAmounts: [amount3], user: user?._id });
+  // await WalletModel.create({ name: 'Wallet 3', firstTimeAmounts: [], user: user?._id });
 
-  await ContactModel.create({ name: 'Bravo', user: user?._id });
-  await ContactModel.create({ name: 'GrandMart', user: user?._id });
-  await ContactModel.create({ name: 'Araz', user: user?._id });
+  // await ContactModel.create({ name: 'Bravo', user: user?._id });
+  // await ContactModel.create({ name: 'GrandMart', user: user?._id });
+  // await ContactModel.create({ name: 'Araz', user: user?._id });
 
-  await CityModel.create({ name: 'Baku', countryName: 'Azerbaijan', user: user?._id });
-  await CityModel.create({ name: 'Sheki', countryName: 'Azerbaijan', user: user?._id });
+  // await CityModel.create({ name: 'Baku', countryName: 'Azerbaijan', user: user?._id });
+  // await CityModel.create({ name: 'Sheki', countryName: 'Azerbaijan', user: user?._id });
 });
 
 afterAll(async () => {
