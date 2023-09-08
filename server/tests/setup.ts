@@ -82,8 +82,14 @@ beforeAll(async () => {
 
   const transactionBaseIds = [];
   for (let i = 0; i < 84; i++) {
+    const amount = await AmountModel.create({
+      value: ((getRandomInt(20) + 1) + '.00'),
+      currency: currencies[getRandomInt(3)]._id,
+      user: global.userId
+    });
+
     const transactionBase = await TransactionBaseModel.create({
-      amount: amounts[getRandomInt(3)]._id,
+      amount: amount._id,
       city: cities[getRandomInt(3)]._id,
       description: 'Test' + i,
       user: global.userId
