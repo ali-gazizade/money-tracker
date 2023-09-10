@@ -79,6 +79,8 @@ beforeAll(async () => {
   contacts[0] = await ContactModel.create({ name: 'Bravo', user: global.userId });
   contacts[1] = await ContactModel.create({ name: 'GrandMart', user: global.userId });
   contacts[2] = await ContactModel.create({ name: 'Araz', user: global.userId });
+  contacts[2] = await ContactModel.create({ name: 'John', user: global.userId });
+  contacts[2] = await ContactModel.create({ name: 'Jack', user: global.userId });
 
   const transactionBaseIds = [];
   for (let i = 0; i < 84; i++) {

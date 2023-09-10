@@ -10,8 +10,8 @@ import moment from 'moment';
 import IncomeModel from '../models/income';
 import TransferModel from '../models/transfer';
 
-describe('Expense', () => {
-  describe('POST /transaction/create/expense', () => {
+describe('Transaction', () => {
+  describe('POST /transaction/create/:type', () => {
     it('should create an expense', async () => {
       const trBaseCountBefore = await TransactionBaseModel.count();
       const expenseCountBefore = await ExpenseModel.count();
@@ -195,6 +195,6 @@ describe('Expense', () => {
 
       expect(response.body.transactions.length).toBe(trBaseCount % limit || limit);
       expect(response.body.totalPages).toBe(lastPage);
-    })
+    });
   });
 });

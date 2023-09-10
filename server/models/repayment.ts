@@ -17,7 +17,7 @@ class Repayment extends BaseDocument {
   contact!: Ref<Contact>;
 
   @prop({ enum: RepayerType, required: true })
-  RepayerType!: RepayerType;
+  repayerType!: RepayerType;
 
   @prop({ type: Date, default: Date.now })
   createdAt!: Date;
