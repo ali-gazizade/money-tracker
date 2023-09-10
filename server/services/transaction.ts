@@ -30,9 +30,9 @@ interface Body {
 }
 
 enum Type {
-  Expense,
-  Income,
-  Transfer
+  Expense = 'Expense',
+  Income = 'Income',
+  Transfer = 'Transfer'
 }
 
 class Transaction {
@@ -94,11 +94,11 @@ class Transaction {
       return {
         error: 'Currency not found with id:' + amount?.currency
       };
-    } else if (!from) {
+    } else if (!this.from) {
       return {
         error: '"From" not found with id:' + from
       };
-    } else if (!to) {
+    } else if (!this.to) {
       return {
         error: '"To" not found with id:' + to
       };
