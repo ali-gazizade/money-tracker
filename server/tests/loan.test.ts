@@ -1,8 +1,8 @@
 import request from 'supertest';
 import app from '../app';
 import WalletModel from '../models/wallet';
-import CurrencyModel from '../models/currency';
-import ContactModel from '../models/contact';
+import CurrencyModel, { Currency } from '../models/currency';
+import ContactModel, { Contact } from '../models/contact';
 import CityModel from '../models/city';
 import TransactionBaseModel from '../models/transactionBase';
 import ExpenseModel from '../models/expense';
@@ -33,6 +33,43 @@ beforeAll(async () => {
   await LoanModel.create({ loanAmountsToUser: [loanAmount], contact: contact?._id, user: global.userId });
 });
 
+const calculateLoan = async (contact: Contact | null, currency: Currency | null) => {
+  const contactBorrowings = await BorrowingModel.find({ contact: contact?._id, user: global.userId }).populate([
+    {
+      path: 'amount',
+      populate: { path: 'currency' }
+    }
+  ]);
+  const contactRepayments = await RepaymentModel.find({ contact: contact?._id, user: global.userId }).populate([
+    {
+      path: 'amount',
+      populate: { path: 'currency' }
+    }
+  ]);
+  let totalContactLoan = 0;
+  let foundLoanAmount = 0;
+  contactBorrowings.forEach(e => {
+    if (e.amount.currency?._id.equals(currency?._id)) {
+      totalContactLoan += +e.amount.value;
+    }
+  });
+  contactRepayments.forEach(e => {
+    if (e.amount.currency?._id.equals(currency?._id)) {
+      totalContactLoan -= +e.amount.value;
+    }
+  });
+  const foundLoan = await LoanModel.findOne({ contact: contact?._id }).populate({
+    path: 'loanAmountsToUser',
+    populate: { path: 'currency' }
+  });
+  foundLoan?.loanAmountsToUser.forEach(e => {
+    if (e.currency._id.equals(currency?._id)) {
+      foundLoanAmount = +e.value;
+    }
+  });
+  expect(totalContactLoan).toBe(foundLoanAmount);
+};
+
 describe('Loan', () => {
   describe('POST /loan/create/:type', () => {
     it('should create a borrowing', async () => {
@@ -50,7 +87,7 @@ describe('Loan', () => {
             value: '16.00',
             currency: currency?._id
           },
-          borrowerType: 'User',
+          borrowerType: 'Contact',
           borrowedAt: '2023-09-10T07:56:00.000Z',
           repaymentExpectedAt: '2023-09-12T07:56:00.000Z',
           description: 'Paid to the restaurant instead of me'
@@ -63,14 +100,16 @@ describe('Loan', () => {
           value: '16.00',
           currency: { name: 'AZN' }
         },
-        borrowerType: 'User',
+        borrowerType: 'Contact',
         borrowedAt: '2023-09-10T07:56:00.000Z',
         repaymentExpectedAt: '2023-09-12T07:56:00.000Z',
         description: 'Paid to the restaurant instead of me'
       });
 
-      const borrowingCountAfter = await TransactionBaseModel.count();
+      const borrowingCountAfter = await BorrowingModel.count();
       expect(borrowingCountAfter).toBe(borrowingCountBefore + 1);
+
+      calculateLoan(contact, currency);
     });
 
     it('should create a borrowing with a binded expense', async () => {
@@ -94,36 +133,43 @@ describe('Loan', () => {
           },
           borrowerType: 'Contact',
           description: 'John borrowed money from me',
-          wallet: wallet?._id,
-          city: city?._id
+          transactionParams: {
+            from: wallet?._id,
+            to: contact?._id,
+            amount: {
+              value: '52.00',
+              currency: currency?._id
+            },
+            city: city?._id,
+            description: 'John borrowed money from me'
+          }
         });
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
         contact: { name: 'John' },
         amount: {
-          value: '16.00',
+          value: '52.00',
           currency: { name: 'AZN' }
         },
         borrowerType: 'Contact',
-        description: 'Gave a loan to John'
+        description: 'John borrowed money from me'
       });
       expect(response.body.bindedTransactionBase).toBeTruthy();
 
-      const borrowingCountAfter = await TransactionBaseModel.count();
+      const borrowingCountAfter = await BorrowingModel.count();
       const trBaseCountAfter = await TransactionBaseModel.count();
       const expenseCountAfter = await ExpenseModel.count();
       expect(borrowingCountAfter).toBe(borrowingCountBefore + 1);
       expect(trBaseCountAfter).toBe(trBaseCountBefore + 1);
       expect(expenseCountAfter).toBe(expenseCountBefore + 1);
+
+      calculateLoan(contact, currency);
     });
 
     it('should create a repayment', async () => {
       const contact = await ContactModel.findOne({ name: 'John', active: true, user: global.userId });
-      const currency = await CurrencyModel.findOne({ name: 'USD', active: true, user: global.userId });
-
-      const amount = await AmountModel.create({ value: '18.00', currency: currency?._id, user: global.userId });
-      await BorrowingModel.create({ amount: amount._id, contact: contact?._id, borrowerType: 'Contact', description: 'Test', user: global.userId });
+      const currency = await CurrencyModel.findOne({ name: 'AZN', active: true, user: global.userId });
 
       const repaymentCountBefore = await RepaymentModel.count();
 
@@ -133,7 +179,7 @@ describe('Loan', () => {
         .send({
           contact: contact?._id,
           amount: {
-            value: '18.00',
+            value: '18.10',
             currency: currency?._id
           },
           repayerType: 'Contact',
@@ -145,7 +191,7 @@ describe('Loan', () => {
       expect(response.body).toMatchObject({
         contact: { name: 'John' },
         amount: {
-          value: '18.00',
+          value: '18.10',
           currency: { name: 'AZN' }
         },
         repayerType: 'Contact',
@@ -153,8 +199,10 @@ describe('Loan', () => {
         description: 'John repaid the loan'
       });
 
-      const repaymentCountAfter = await TransactionBaseModel.count();
+      const repaymentCountAfter = await RepaymentModel.count();
       expect(repaymentCountAfter).toBe(repaymentCountBefore + 1);
+
+      calculateLoan(contact, currency);
     });
     
     it('should return an error for the repayment not matching any borrowing', async () => {
@@ -169,7 +217,7 @@ describe('Loan', () => {
         .send({
           contact: contact?._id,
           amount: {
-            value: '20.00',
+            value: '2000.00',
             currency: currency?._id
           },
           repayerType: 'Contact',
@@ -180,8 +228,10 @@ describe('Loan', () => {
       expect(response.status).toBe(404);
       expect(response.body.error).toBe('Borrowing not found');
 
-      const repaymentCountAfter = await TransactionBaseModel.count();
-      expect(repaymentCountAfter).toBe(repaymentCountBefore + 1);
+      const repaymentCountAfter = await RepaymentModel.count();
+      expect(repaymentCountAfter).toBe(repaymentCountBefore);
+
+      calculateLoan(contact, currency);
     });
   });
 
@@ -223,6 +273,7 @@ describe('Loan', () => {
         .get(`/loan/contact_list?page=${lastPage}&limit=${limit}`)
         .set('Cookie', `token=${global.token}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.loans.length).toBe(loanCount % limit || limit);
       expect(response.body.totalPages).toBe(lastPage);
     });

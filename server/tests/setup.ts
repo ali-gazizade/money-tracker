@@ -11,6 +11,9 @@ import ExpenseModel from '../models/expense';
 import IncomeModel from '../models/income';
 import TransferModel from '../models/transfer';
 import TransactionBaseModel from '../models/transactionBase';
+import BorrowingModel from '../models/borrowing';
+import RepaymentModel from '../models/repayment';
+import LoanModel from '../models/loan';
 
 const getRandomInt = (max: number) => {
   return Math.floor(Math.random() * max);
@@ -54,6 +57,9 @@ beforeAll(async () => {
   await IncomeModel.deleteMany();
   await TransferModel.deleteMany();
   await TransactionBaseModel.deleteMany();
+  await BorrowingModel.deleteMany();
+  await RepaymentModel.deleteMany();
+  await LoanModel.deleteMany();
 
   const currencies = [];
   currencies[0] = await CurrencyModel.create({ name: 'AZN', isDefault: true, active: true, user: global.userId });
