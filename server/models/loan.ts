@@ -4,7 +4,7 @@ import { Contact } from './contact';
 import { Amount } from './amount';
 
 class Loan extends BaseDocument {
-  @prop({ ref: () => Contact, required: true })
+  @prop({ ref: () => Contact, required: true, unique: true })
   contact!: Ref<Contact>;
 
   @prop({ ref: () => Amount, type: () => [Amount], required: true })
