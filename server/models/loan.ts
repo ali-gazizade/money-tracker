@@ -14,7 +14,11 @@ class Loan extends BaseDocument {
   version!: number;
 }
 
-const LoanModel = getModelForClass(Loan);
+const LoanModel = getModelForClass(Loan, {
+  schemaOptions: {
+    versionKey: false
+  }
+});
 
 export default LoanModel;
 

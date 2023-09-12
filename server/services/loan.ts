@@ -163,6 +163,10 @@ class Loan {
       // End Subtracting repayments
 
       for (let currencyId in loanAmountsObj) {
+        if (+loanAmountsObj[currencyId] === 0) {
+          continue;
+        }
+
         const savedAmount = await (new AmountModel({
           value: loanAmountsObj[currencyId],
           currency: currencyId,
@@ -171,9 +175,10 @@ class Loan {
         loanAmountsToUser.push(savedAmount._id);
       }
 
-      loanBefore.version = loanBefore?.version + 1;
-      loanBefore.loanAmountsToUser = loanAmountsToUser;
-      await loanBefore.save();
+      await LoanModel.findOneAndUpdate({ _id: loanBefore._id }, {
+        loanAmountsToUser,
+        $inc: { version: 1 }
+      });
 
       const loanAfter = await LoanModel.findOne({ contact: this.contact?._id, user: this.user });
       versionAfter = loanAfter?.version || 0;
@@ -242,9 +247,9 @@ class Loan {
 
       foundLoan?.loanAmountsToUser.forEach(e => {
         if (e.currency.id === this.body.amount.currency) {
-          if (requiredLoanAmountToUser < 0 && e.value < requiredLoanAmountToUser) {
+          if (requiredLoanAmountToUser < 0 && e.value <= requiredLoanAmountToUser) {
             requiredAmountFound = true;
-          } else if (requiredLoanAmountToUser > 0 && e.value > requiredLoanAmountToUser) {
+          } else if (requiredLoanAmountToUser > 0 && e.value >= requiredLoanAmountToUser) {
             requiredAmountFound = true;
           }
         }
