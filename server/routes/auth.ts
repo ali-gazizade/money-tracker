@@ -79,9 +79,13 @@ async (req: MyRequest, res: Response) => {
 
     res.json({ token });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+router.get('/logout', (req: MyRequest, res: Response) => {
+  res.cookie('token', '', { httpOnly: true });
+  res.redirect('/login');
 });
 
 export default router;
