@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Button, Form, Input, Typography } from 'antd';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import { setCookie } from 'cookies-next';
 
 const { Title } = Typography;
 
@@ -13,6 +14,7 @@ const Login: React.FC = () => {
     axios.post('bi/auth/login', values)
       .then(result => {
         if(result.data.token) {
+          setCookie('login', '1');
           router.push('/');
         }
       })
