@@ -7,7 +7,8 @@ import { useRouter } from 'next/router';
 
 const Navbar: React.FC = () => {
   const router = useRouter();
-  const [current, setCurrent] = useState('transactions');
+  const pathname = router.pathname.replace('/', '') || 'home';
+  const [current, setCurrent] = useState(pathname);
 
   const items: MenuProps['items'] = [
     {
@@ -76,6 +77,7 @@ const Navbar: React.FC = () => {
 
   const onClick: MenuProps['onClick'] = (e) => {
     setCurrent(e.key);
+    router.push(e.key === 'home' ? '/' : ('/' + e.key));
   };
 
   return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} className='navbar-menu' />;

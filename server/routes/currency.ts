@@ -94,19 +94,6 @@ router.put('/update/:id', async (req: MyRequest, res: Response) => {
       return res.status(404).json({ error: 'Currency not found' });
     }
 
-    // Check for default
-    if (typeof isDefault !== 'undefined') {
-      const defaultCurrency = await CurrencyModel.findOne({ isDefault: true, user: req.user, active: true }).exec();
-
-      if (isDefault === true && defaultCurrency) {
-        defaultCurrency.isDefault = false;
-        await defaultCurrency.save();
-      } else if (isDefault === false && !defaultCurrency) {
-        // There must be at least 1 default, so nothing will happen here
-        isDefault = true;
-      }
-    }
-
     if (typeof name !== 'undefined') {
       currency.name = name;
     }
@@ -121,9 +108,29 @@ router.put('/update/:id', async (req: MyRequest, res: Response) => {
 
     // Check if the same currency already exists
     if (active !== false && name) {
-      const existingCurrency = await CurrencyModel.findOne({ name: currency.name, user: req.user, active: true }).exec();
+      const existingCurrency = await CurrencyModel.findOne({
+        name: currency.name,
+        user: req.user,
+        active: true,
+        _id: {
+          $ne: id
+        }
+      }).exec();
       if (existingCurrency) {
         return res.status(409).json({ error: 'Currency already exists' });
+      }
+    }
+
+    // Check for default
+    if (typeof isDefault !== 'undefined') {
+      const defaultCurrency = await CurrencyModel.findOne({ isDefault: true, user: req.user, active: true }).exec();
+
+      if (isDefault === true && defaultCurrency) {
+        defaultCurrency.isDefault = false;
+        await defaultCurrency.save();
+      } else if (isDefault === false && !defaultCurrency) {
+        // There must be at least 1 default, so nothing will happen here
+        isDefault = true;
       }
     }
 

@@ -16,6 +16,18 @@
   margin-top: 100px;
 }
 
+.add-btn {
+  margin-left: 12px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field:first-child {
+  margin-top: 16px;
+}
+
 @media screen and (min-width: 1000px) {
   .login {
     padding-top: 100px;
