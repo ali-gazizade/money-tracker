@@ -24,6 +24,7 @@ router.get('/list', async (req: MyRequest, res: Response) => {
 
     res.status(200).json({
       totalPages: Math.ceil(totalCount / limit),
+      totalCount,
       cities: cities.map(e => cityAssembler(e))
     });
   } catch (error) {

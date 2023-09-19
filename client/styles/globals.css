@@ -28,6 +28,11 @@
   margin-top: 16px;
 }
 
+.pagination {
+  display: table;
+  margin: 50px auto;
+}
+
 @media screen and (min-width: 1000px) {
   .login {
     padding-top: 100px;
