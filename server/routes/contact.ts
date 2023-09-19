@@ -8,16 +8,6 @@ import { Amount } from '../models/amount';
 
 const router = Router();
 
-enum LoanSide {
-  ContactOwesUser,
-  UserOwesContact
-}
-
-interface Loan {
-  amount: Amount,
-  side: LoanSide
-}
-
 router.get('/list', async (req: MyRequest, res: Response) => {
   try {
     const page = Number(req.query.page) || 1;
@@ -48,7 +38,7 @@ router.post('/create', [
 ],
  async (req: MyRequest, res: Response) => {
   try {
-    let { name, loan } : { name: string, loan: Loan } = req.body;
+    let { name } : { name: string } = req.body;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -64,16 +54,8 @@ router.post('/create', [
     const contact = new ContactModel({ name, user: req.user, active: true });
     await contact.save();
 
-    let createdLoan = false;
-    // Add loan
-    if (+(loan?.amount?.value) > 0) {
-      createdLoan = true;
-      // Todo create the loan transaction
-    }
-
     res.status(201).json({
-      contact: contactAssembler(contact),
-      createdLoan
+      contact: contactAssembler(contact)
     });
   } catch (error) {
     console.error('Error creating contact:', error);
