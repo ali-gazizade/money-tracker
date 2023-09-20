@@ -3,14 +3,9 @@ import Layout from '@/components/layout';
 import axios from 'axios';
 import { Button, Card, Input, Modal, Popconfirm, Space, Switch, Tooltip, Typography, message } from 'antd';
 import { PlusOutlined, EditOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons';
+import Currency from '@/interfaces/Currency';
 
 const { Title, Text } = Typography;
-
-interface Currency {
-  _id: string;
-  name: string;
-  isDefault: boolean;
-}
 
 const Currencies: React.FC = () => {
   const [list, setList] = useState<Currency[]>([]);
@@ -138,3 +133,5 @@ const Currencies: React.FC = () => {
 };
 
 export default Currencies;
+
+export { type Currency };

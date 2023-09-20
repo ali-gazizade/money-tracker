@@ -77,7 +77,9 @@ const Navbar: React.FC = () => {
 
   const onClick: MenuProps['onClick'] = (e) => {
     setCurrent(e.key);
-    router.push(e.key === 'home' ? '/' : ('/' + e.key));
+    if (e.key !== 'logout') {
+      router.push(e.key === 'home' ? '/' : ('/' + e.key));
+    }
   };
 
   return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} className='navbar-menu' />;

@@ -101,13 +101,7 @@ const Contacts: React.FC = () => {
       <Space size={[16, 16]} wrap>
         {list.map(e => (
           <Card
-            title={
-              <Space size={[4, 4]} direction="vertical">
-                <Text>
-                  { e.name }
-                </Text>
-              </Space>
-            }
+            title={ e.name }
             bordered={false}
             key={e._id}
           >
