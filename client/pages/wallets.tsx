@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Layout from '@/components/layout';
+import Layout from '@/components/Layout';
 import axios from 'axios';
 import { Button, Card, Input, Modal, Popconfirm, Space, Switch, Tooltip, Typography, message } from 'antd';
 import { PlusOutlined, EditOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons';
-import Amount from '@/components/amount';
+import Amount from '@/components/Amount';
 import AmountInterface from '@/interfaces/Amount';
 import { Currency } from './currencies';
 import Wallet from '@/interfaces/Wallet';

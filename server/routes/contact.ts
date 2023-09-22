@@ -34,6 +34,7 @@ router.get('/list', async (req: MyRequest, res: Response) => {
 
     res.status(200).json({
       totalPages: Math.ceil(totalCount / limit),
+      totalCount,
       contacts: contacts.map(e => contactAssembler(e))
     });
   } catch (error) {

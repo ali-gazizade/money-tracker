@@ -1,4 +1,4 @@
-import Navbar from "./navbar";
+import Navbar from "./Navbar";
 import { useRouter } from "next/router";
 import { getCookie } from 'cookies-next';
 import { useEffect, useState } from "react";

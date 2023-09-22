@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import Layout from '@/components/layout';
+import Layout from '@/components/Layout';
 import axios from 'axios';
-import { Button, Modal, Pagination, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Button, Modal, Pagination, Select, Space, Table, Tag, Typography, message, Input } from 'antd';
 import Wallet from '@/interfaces/Wallet';
 import Contact from '@/interfaces/Contact';
 import DebounceSelect from '@/components/DebounceSelect';
 import SelectValue from '@/interfaces/SelectValue';
-import Amount from '@/components/amount';
+import Amount from '@/components/Amount';
 import AmountInterface from '@/interfaces/Amount';
 import { Currency } from './currencies';
 import City from '@/interfaces/City';
-import TextArea from 'antd/es/input/TextArea';
+import TransactionType from '@/enums/TransactionType';
 
 const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 interface Transaction {
   _id: string;
@@ -46,11 +47,11 @@ const columns = [
     dataIndex: 'type',
     key: 'type',
     render: (e: string) => <Tag
-      color={ e === 'Expense'
+      color={ e === TransactionType.Expense
         ? 'red'
-        : e === 'Income'
+        : e === TransactionType.Income
           ? 'green'
-          : e === 'Transfer'
+          : e === TransactionType.Transfer
             ? 'yellow'
             : 'volcano'
       }
@@ -93,18 +94,22 @@ const Transactions: React.FC = () => {
   const [amount, setAmount] = useState<AmountInterface>({ value: '0', currency: '' });
   const [city, setCity] = useState<SelectValue>({ value: '', label: '' });
   const [description, setDescription] = useState('');
-  const [modalTitle, setModalTitle] = useState('New Transaction');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [walletOptions, setWalletOptions] = useState<SelectValue[]>([]);
-  const [contactOptions, setContactOptions] = useState<SelectValue[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
   const updateList = async () => {
     const res = await axios.get(`bi/transaction/list?page=${currentPage}&limit=${pageSize}`);
     setList(res.data?.transactions);
     setTotalCount(res.data?.totalCount);
+
+    if (res.data?.transactions?.length) { // Set the last used city as default
+      const lastUsedCity = res.data.transactions[0].city;
+      setCity({ value: lastUsedCity._id, label: lastUsedCity.name });
+    }
   };
 
   const updateCurrencies = async () => {
@@ -136,21 +141,21 @@ const Transactions: React.FC = () => {
   }, [currentPage, pageSize]);
 
   const showCreateModal = () => {
-    setModalTitle('New Transaction');
     setFrom({ value: '', label: '' });
     setTo({ value: '', label: '' });
     setAmount({ ...amount, value: '0' });
-    setCity({ value: '', label: '' });
     setDescription('');
-    setContactOptions([]);
     setIsModalOpen(true);
   };
 
   const handleOk = async () => {
-    // await axios.post('bi/transaction/create', { // Todo uncomment
-    //   from, to, city, description
-    // });
-    console.log({ from, to, amount, city, description });
+    await axios.post(`bi/transaction/create/${type.toLowerCase()}`, {
+      from: from.value,
+      to: to.value,
+      amount,
+      city: city.value,
+      description
+    });
     message.success('Successfully created');
     updateList();
     setIsModalOpen(false);
@@ -199,29 +204,62 @@ const Transactions: React.FC = () => {
       });
   };
 
+  const onFromChange = (from: SelectValue | SelectValue[]) => {
+    if (!Array.isArray(from)) setFrom({
+      value: from?.value, label: from?.label || ''
+    })
+  };
+
+  const onToChange = (to: SelectValue | SelectValue[]) => {
+    if (!Array.isArray(to)) setTo({
+      value: to?.value, label: to?.label || ''
+    })
+  };
+
+  const onCityChange = (city: SelectValue | SelectValue[]) => {
+    if (!Array.isArray(city)) {
+      setCity({ value: city?.value, label: city?.label || '' });
+    }
+  };
+
   return <>
-    <Modal width={350} title={modalTitle} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+    <Modal width={350} title={`New ${type}`} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
       <Text strong>From: </Text>
-      <Select
-        placeholder="Select a wallet"
-        options={walletOptions}
-        value={from}
-        onChange={(value, e) => {
-          if (!Array.isArray(e)) setFrom({ value: e?.value, label: e?.label || '' })
-        }}
-        className="form-field"
-      />
+      { type === TransactionType.Income
+        ? <DebounceSelect
+          showSearch
+          value={from}
+          placeholder="Select a contact"
+          fetchOptions={fetchContactsList}
+          onChange={onFromChange}
+          className="form-field"
+        />
+        : <Select
+          placeholder="Select a wallet"
+          options={walletOptions}
+          value={from}
+          onChange={(value, e) => onFromChange(e)}
+          className="form-field"
+        />
+      }
       <Text strong>To: </Text>
-      <DebounceSelect
-        showSearch
-        value={to}
-        placeholder="Select a contact"
-        fetchOptions={fetchContactsList}
-        onChange={e => {
-          if (!Array.isArray(e)) setTo({ value: e?.value, label: e?.label || '' })
-        }}
-        className="form-field"
-      />
+      { type === TransactionType.Expense
+        ? <DebounceSelect
+          showSearch
+          value={to}
+          placeholder="Select a contact"
+          fetchOptions={fetchContactsList}
+          onChange={onToChange}
+          className="form-field"
+        />
+        : <Select
+          placeholder="Select a wallet"
+          options={walletOptions}
+          value={to}
+          onChange={(value, e) => onToChange(e)}
+          className="form-field"
+        />
+      }
       <div className="text-center">
         <Amount
           value={amount.value}
@@ -237,9 +275,7 @@ const Transactions: React.FC = () => {
         value={city}
         placeholder="Select a city"
         fetchOptions={fetchCitiesList}
-        onChange={e => {
-          if (!Array.isArray(e)) setCity({ value: e?.value, label: e?.label || '' })
-        }}
+        onChange={ onCityChange }
         className="form-field"
       />
       <TextArea
@@ -254,18 +290,45 @@ const Transactions: React.FC = () => {
         Transactions
         <br/>
         <Space wrap className="text-center">
-          <Button style={{ backgroundColor: '#cf1322' }} type="primary" size="large" className="add-btn" onClick={showCreateModal}>
+          <Button
+            style={{ backgroundColor: '#cf1322' }}
+            type="primary"
+            size="large"
+            className="add-btn"
+            onClick={() => {
+              setType(TransactionType.Expense);
+              showCreateModal();
+            }}
+          >
             Add Expense
           </Button>
-          <Button style={{ backgroundColor: '#389e0d' }} type="primary" size="large" className="add-btn" onClick={showCreateModal}>
+          <Button
+            style={{ backgroundColor: '#389e0d' }}
+            type="primary"
+            size="large"
+            className="add-btn"
+            onClick={() => {
+              setType(TransactionType.Income);
+              showCreateModal();
+            }}
+          >
             Add Income
           </Button>
-          <Button style={{ backgroundColor: '#d4b106' }} type="primary" size="large" className="add-btn" onClick={showCreateModal}>
+          <Button
+            style={{ backgroundColor: '#d4b106' }}
+            type="primary"
+            size="large"
+            className="add-btn"
+            onClick={() => {
+              setType(TransactionType.Transfer);
+              showCreateModal();
+            }}
+          >
             Add Transfer
           </Button>
         </Space>
       </Title>
-      <Table pagination={false} columns={columns} dataSource={list} />
+      <Table pagination={false} columns={columns} dataSource={list} rowKey="_id" />
       <Pagination 
         className="pagination" 
         current={currentPage}
