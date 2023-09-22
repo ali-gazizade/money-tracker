@@ -6,13 +6,9 @@ import { PlusOutlined, EditOutlined, SelectOutlined, DeleteOutlined } from '@ant
 import Amount from '@/components/amount';
 import AmountInterface from '@/interfaces/Amount';
 import { Currency } from './currencies';
+import Wallet from '@/interfaces/Wallet';
 
 const { Title, Text } = Typography;
-
-interface Wallet {
-  _id: string;
-  name: string;
-}
 
 let idIndex = 1; // Temporary id for keys
 
@@ -139,10 +135,10 @@ const Wallets: React.FC = () => {
                   value={e.value}
                   currencies={currencies}
                   selectedCurrencyId={e.currency}
-                  onValueChange={value => changeInitialAmountValue(e._id, value || '0')} // Always number, if null then 0
-                  onCurrencyChange={value => changeInitialAmountCurrency(e._id, value)}
+                  onValueChange={value => changeInitialAmountValue(e._id || '', value || '0')} // Value always number, if null then 0
+                  onCurrencyChange={value => changeInitialAmountCurrency(e._id || '', value)}
                 />
-                <Button danger type="primary" size="middle" onClick={() => removeInitialAmount(e._id)} style={{ marginLeft: '8px' }}>
+                <Button danger type="primary" size="middle" onClick={() => removeInitialAmount(e._id || '')} style={{ marginLeft: '8px' }}>
                   <DeleteOutlined />
                 </Button>
               </div>

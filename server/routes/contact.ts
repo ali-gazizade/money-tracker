@@ -5,6 +5,7 @@ import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import contactAssembler from '../assemblers/contact';
 import { Amount } from '../models/amount';
+import LooseObject from '../interfaces/LooseObject';
 
 const router = Router();
 
@@ -12,10 +13,18 @@ router.get('/list', async (req: MyRequest, res: Response) => {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const { name } = req.query;
 
     const skipAmount = (page - 1) * limit;
 
-    const query = { user: req.user, active: true };
+    const query: LooseObject = { user: req.user, active: true };
+
+    if (name) {
+      query.name = {
+        $regex: '.*' + name + '.*',
+        $options: 'i'
+      };
+    }
 
     const contacts = await ContactModel.find(query)
       .skip(skipAmount)

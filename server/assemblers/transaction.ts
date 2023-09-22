@@ -1,3 +1,4 @@
+import { Contact } from '../models/contact';
 import { Expense } from '../models/expense';
 import { Income } from '../models/income';
 import { Transfer } from '../models/transfer';
@@ -5,6 +6,13 @@ import { Transfer } from '../models/transfer';
 const transactionAssembler = (transaction: Expense | Income | Transfer) => {
   return {
     _id: transaction._id,
+    type: transaction.from?.firstTimeAmounts && transaction.to?.firstTimeAmounts // From and To are wallets
+      ? 'Transfer'
+      : transaction.from?.firstTimeAmounts // From is a wallet
+        ? 'Expense'
+        : transaction.to?.firstTimeAmounts // To is a wallet,
+          ? 'Income'
+          : 'Unknown',
     to: {
       _id: transaction.to._id,
       name: transaction.to.name

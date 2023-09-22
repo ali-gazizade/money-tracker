@@ -3,13 +3,9 @@ import Layout from '@/components/layout';
 import axios from 'axios';
 import { AutoComplete, Button, Card, Input, Modal, Pagination, Popconfirm, Space, Typography, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import Contact from '@/interfaces/Contact';
 
 const { Title, Text } = Typography;
-
-interface Contact {
-  _id: string;
-  name: string;
-}
 
 const Contacts: React.FC = () => {
   const [list, setList] = useState<Contact[]>([]);

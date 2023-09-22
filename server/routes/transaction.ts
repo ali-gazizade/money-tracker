@@ -67,6 +67,7 @@ router.get('/list', async (req: MyRequest, res: Response) => {
     const query = { user: req.user };
 
     const transactionBases = await TransactionBaseModel.find(query)
+      .sort({ happenedAt: 'desc' })
       .skip(skipAmount)
       .limit(limit);
 

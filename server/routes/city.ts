@@ -4,6 +4,7 @@ import CityModel, { City } from '../models/city';
 import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import cityAssembler from '../assemblers/city';
+import LooseObject from '../interfaces/LooseObject';
 
 const router = Router();
 
@@ -11,10 +12,18 @@ router.get('/list', async (req: MyRequest, res: Response) => {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const { name } = req.query;
 
     const skipAmount = (page - 1) * limit;
 
-    const query = { user: req.user, active: true };
+    const query: LooseObject = { user: req.user, active: true };
+
+    if (name) {
+      query.name = {
+        $regex: '.*' + name + '.*',
+        $options: 'i'
+      };
+    }
 
     const cities = await CityModel.find(query)
       .skip(skipAmount)
