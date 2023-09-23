@@ -169,4 +169,19 @@ router.put('/update/:id', async (req: MyRequest, res: Response) => {
   }
 });
 
+router.get('/default', async (req: MyRequest, res: Response) => {
+  try {
+    const currency: Currency | null = await CurrencyModel.findOne({ isDefault: true, user: req.user, active: true });
+
+    if (!currency) {
+      return res.status(404).json({ error: 'Currency not found' });
+    }
+
+    return res.status(200).json(currencyAssembler(currency));
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
 export default router;

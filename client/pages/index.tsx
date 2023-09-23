@@ -6,19 +6,31 @@ import Currency from '@/interfaces/Currency';
 
 const { Title } = Typography;
 
-interface DashboardData {
+interface TotalsData {
   expense: number,
   income: number,
-  balance: number,
-  currency: Currency
+  balance: number
 };
 
+interface LoansData {
+  loanAmountToUser: number,
+  loanAmountToContacts: number
+}
+
 const App: React.FC = () => {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [totalsData, setTotalsData] = useState<TotalsData | null>(null);
+  const [loansData, setLoansData] = useState<LoansData | null>(null);
+  const [currency, setCurrency] = useState<Currency | null>(null);
 
   const updateData = async () => {
-    const res = await axios.get('bi/dashboard/totals');
-    setData(res.data);
+    const totalsRes = await axios.get('bi/dashboard/totals');
+    setTotalsData(totalsRes.data);
+
+    const loansRes = await axios.get('bi/dashboard/loan');
+    setLoansData(loansRes.data);
+
+    const defCurrencyRes = await axios.get('bi/currency/default');
+    setCurrency(defCurrencyRes.data);
   }
 
   useEffect(() => {
@@ -26,23 +38,40 @@ const App: React.FC = () => {
   }, []);
 
   return <Layout>
+    <Title className="text-center" level={2}>
+      Dashboard
+    </Title>
     <Space size={[16, 16]} style={{ padding: 24 }} wrap>
       <Card bordered={false} style={{ backgroundColor: '#e6f4ff' }}>
         <Statistic
           title="Balance"
-          value={`${data?.balance} ${data?.currency?.name}`}
+          value={`${totalsData?.balance} ${currency?.name}`}
         />
       </Card>
       <Card bordered={false} style={{ backgroundColor: '#fff2f0' }}>
         <Statistic
           title="Expense"
-          value={`${data?.expense} ${data?.currency?.name}`}
+          value={`${totalsData?.expense} ${currency?.name}`}
         />
       </Card>
       <Card bordered={false} style={{ backgroundColor: '#f6ffed' }}>
         <Statistic
           title="Income"
-          value={`${data?.income} ${data?.currency?.name}`}
+          value={`${totalsData?.income} ${currency?.name}`}
+        />
+      </Card>
+    </Space>
+    <Space size={[48, 48]} style={{ padding: 24 }} wrap>
+      <Card bordered={false} style={{ backgroundColor: '#f0f5ff' }}>
+        <Statistic
+          title="Loan to Contacts"
+          value={`${loansData?.loanAmountToContacts} ${currency?.name}`}
+        />
+      </Card>
+      <Card bordered={false} style={{ backgroundColor: '#e6fffb' }}>
+        <Statistic
+          title="Loan to me"
+          value={`${loansData?.loanAmountToUser} ${currency?.name}`}
         />
       </Card>
     </Space>

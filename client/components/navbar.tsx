@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
 
   const items: MenuProps['items'] = [
     {
-      label: 'Home',
+      label: 'Dashboard',
       key: 'home',
       icon: <HomeOutlined />,
     },
