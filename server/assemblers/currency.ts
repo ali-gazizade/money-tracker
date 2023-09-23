@@ -4,7 +4,8 @@ const currencyAssembler = (currency: Currency) => {
   return {
     _id: currency._id,
     name: currency.name,
-    isDefault: currency.isDefault
+    isDefault: currency.isDefault,
+    exchangeRate: currency.exchangeRate || currency._exchangeRate
   };
 };
 

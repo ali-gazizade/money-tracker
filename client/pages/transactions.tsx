@@ -71,8 +71,9 @@ const columns = [
   },
   {
     title: 'Amount',
-    dataIndex: ['amount', 'value'],
     key: 'amount',
+    render: (e: Transaction) =>
+      e.amount.value + ' ' + e.amount.currency.name
   },
   {
     title: 'City',

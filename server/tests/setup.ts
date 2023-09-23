@@ -62,9 +62,9 @@ beforeAll(async () => {
   await LoanModel.deleteMany();
 
   const currencies = [];
-  currencies[0] = await CurrencyModel.create({ name: 'AZN', isDefault: true, active: true, user: global.userId });
-  currencies[1] = await CurrencyModel.create({ name: 'USD', isDefault: false, active: true, user: global.userId });
-  currencies[2] = await CurrencyModel.create({ name: 'EUR', isDefault: false, active: true, user: global.userId });
+  currencies[0] = await CurrencyModel.create({ name: 'AZN', isDefault: true, exchangeRate: 1, active: true, user: global.userId });
+  currencies[1] = await CurrencyModel.create({ name: 'USD', isDefault: false, exchangeRate: 1.7, active: true, user: global.userId });
+  currencies[2] = await CurrencyModel.create({ name: 'EUR', isDefault: false, exchangeRate: 1.81, active: true, user: global.userId });
 
   const cities = [];
   cities[0] = await CityModel.create({ name: 'Baku', countryName: 'Azerbaijan', user: global.userId });

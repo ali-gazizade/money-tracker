@@ -13,6 +13,7 @@ const Currencies: React.FC = () => {
   const [id, setId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [isDefault, setIsDefault] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(1);
   const [modalTitle, setModalTitle] = useState('New Currency');
 
   const updateList = async () => {
@@ -29,6 +30,7 @@ const Currencies: React.FC = () => {
     setId(null);
     setName('');
     setIsDefault(false);
+    setExchangeRate(1);
     setIsModalOpen(true);
   };
 
@@ -42,20 +44,21 @@ const Currencies: React.FC = () => {
     setId(id);
     setName(item.name);
     setIsDefault(item.isDefault);
+    setExchangeRate(item.exchangeRate);
     setIsModalOpen(true);
   };
 
   const handleOk = async () => {
     if (!id) { // Create
       await axios.post('bi/currency/create', {
-        name, isDefault
+        name, isDefault, exchangeRate
       });
       message.success('Successfully created');
       updateList();
       setIsModalOpen(false);
     } else { // Update
       await axios.put('bi/currency/update/' + id, {
-        name, isDefault
+        name, isDefault, exchangeRate
       });
       message.success('Successfully updated');
       updateList();
@@ -75,6 +78,10 @@ const Currencies: React.FC = () => {
     setIsDefault(checked);
   }
 
+  const onExchangeRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExchangeRate(+e?.target?.value);
+  }
+
   const confirmDelete = async (id: string) => {
     await axios.put('bi/currency/update/' + id, { active: false });
     message.success('Successfully deleted');
@@ -88,6 +95,7 @@ const Currencies: React.FC = () => {
         <Text>Default: </Text>
         <Switch checked={isDefault} onChange={onIsDefaultChange} />
       </div>
+      <Input type="number" placeholder="Exchange Rate" value={exchangeRate} onChange={onExchangeRateChange} className="form-field" />
     </Modal>
     <Layout>
       <Title className="text-center" level={2}>
@@ -107,7 +115,7 @@ const Currencies: React.FC = () => {
                   </Tooltip>
                   : null
                 }
-                { ' ' + e.name }
+                { ` ${e.name} - ${e.exchangeRate}` }
               </Text>
             }
             bordered={false}

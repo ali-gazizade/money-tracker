@@ -23,7 +23,11 @@ router.post('/create', [
 ],
  async (req: MyRequest, res: Response) => {
   try {
-    let { name, isDefault } = req.body;
+    let { name, isDefault, exchangeRate } = req.body;
+
+    if (isDefault) {
+      exchangeRate = 1;
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -45,7 +49,7 @@ router.post('/create', [
       isDefault = true;
     }
 
-    const currency = new CurrencyModel({ name, isDefault, user: req.user, active: true });
+    const currency = new CurrencyModel({ name, isDefault, user: req.user, exchangeRate, active: true });
     await currency.save();
 
     res.status(201).json(currencyAssembler(currency));
@@ -79,7 +83,7 @@ router.get('/get/:id', async (req: MyRequest, res: Response) => {
 router.put('/update/:id', async (req: MyRequest, res: Response) => {
   try {
     const { id } = req.params;
-    let { name, isDefault, active } = req.body;
+    let { name, isDefault, exchangeRate, active } = req.body;
 
     if (active === false) {
       isDefault = false;
@@ -94,8 +98,19 @@ router.put('/update/:id', async (req: MyRequest, res: Response) => {
       return res.status(404).json({ error: 'Currency not found' });
     }
 
+    if ( // Default currencies always have exchange rate as 1
+      (typeof isDefault !== 'undefined' && isDefault) ||
+      (typeof isDefault === 'undefined' && currency.isDefault)
+    ) {
+      exchangeRate = 1;
+    }
+
     if (typeof name !== 'undefined') {
       currency.name = name;
+    }
+
+    if (typeof exchangeRate !== 'undefined') {
+      currency.exchangeRate = exchangeRate;
     }
 
     if (typeof isDefault !== 'undefined') {
@@ -142,6 +157,7 @@ router.put('/update/:id', async (req: MyRequest, res: Response) => {
       const anyCurrency = await CurrencyModel.findOne({ user: req.user, active: true }).exec();
       if (anyCurrency) {
         anyCurrency.isDefault = true;
+        anyCurrency.exchangeRate = 1;
         await anyCurrency.save();
       }
     }
