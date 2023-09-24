@@ -2,7 +2,9 @@ import Navbar from "./Navbar";
 import { useRouter } from "next/router";
 import { getCookie } from 'cookies-next';
 import { useEffect, useState } from "react";
-import { Spin } from "antd";
+import { Spin, Layout as AntLayout, Divider } from "antd";
+
+const { Footer } = AntLayout;
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,8 +31,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Spin>
         </div>
       : <div>
-        <Navbar />
-        <main>{children}</main>
+        <AntLayout className="layout">
+          <Navbar />
+          <main>{children}</main>
+        </AntLayout>
+        <Footer className="footer">
+          <Divider />
+          Made by Ali Gazizade
+        </Footer>
       </div>
   );
 };

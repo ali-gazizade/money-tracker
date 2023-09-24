@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import axios from 'axios';
-import { Card, Space, Statistic, Typography } from 'antd';
+import { Card, Divider, Space, Statistic, Typography } from 'antd';
 import Currency from '@/interfaces/Currency';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 interface TotalsData {
   expense: number,
@@ -15,11 +15,22 @@ interface TotalsData {
 interface LoansData {
   loanAmountToUser: number,
   loanAmountToContacts: number
-}
+};
+
+interface Wallet {
+  _id: string,
+  name: string,
+  currentAmounts: {
+    currencyId: string,
+    currencyName: string,
+    total: number
+  }[]
+};
 
 const App: React.FC = () => {
   const [totalsData, setTotalsData] = useState<TotalsData | null>(null);
   const [loansData, setLoansData] = useState<LoansData | null>(null);
+  const [walletsData, setWalletsData] = useState<Wallet[]>([]);
   const [currency, setCurrency] = useState<Currency | null>(null);
 
   const updateData = async () => {
@@ -31,6 +42,9 @@ const App: React.FC = () => {
 
     const defCurrencyRes = await axios.get('bi/currency/default');
     setCurrency(defCurrencyRes.data);
+
+    const walletsRes = await axios.get('bi/dashboard/wallet_list');
+    setWalletsData(walletsRes.data?.wallets || []);
   }
 
   useEffect(() => {
@@ -74,6 +88,28 @@ const App: React.FC = () => {
           value={`${loansData?.loanAmountToUser} ${currency?.name}`}
         />
       </Card>
+    </Space>
+    <Divider orientation="left">Wallets</Divider>
+    <Space size={[48, 48]} style={{ padding: 24 }} wrap>
+      { walletsData.map(wallet =>
+        <Card
+          title={ wallet.name }
+          bordered={false}
+          key={wallet._id}
+        >
+          <Space
+            size={[8, 8]}
+            direction={ wallet.currentAmounts.length > 3 ? 'vertical' : 'horizontal' }
+          >
+            { wallet.currentAmounts.map(amount =>
+              <React.Fragment key={amount.currencyId}>
+                <Text>{amount.total} {amount.currencyName}</Text>
+                <br />
+              </React.Fragment>
+            )}
+          </Space>
+        </Card>
+      )}
     </Space>
   </Layout>;
 };

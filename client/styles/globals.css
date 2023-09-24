@@ -16,6 +16,15 @@
   margin-top: 100px;
 }
 
+.layout {
+  min-height: calc(100vh - 132px);
+}
+
+.footer {
+  text-align: center;
+  color: #888888;
+}
+
 .add-btn {
   margin-left: 12px;
 }
