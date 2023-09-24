@@ -39,24 +39,24 @@ const Navbar: React.FC = () => {
     },
     {
       label: 'Settings',
-      key: 'SubMenu',
+      key: 'settings',
       icon: <SettingOutlined />,
       children: [
         {
           label: 'Contacts',
-          key: 'contacts',
+          key: 'settings/contacts',
         },
         {
           label: 'Wallets',
-          key: 'wallets',
+          key: 'settings/wallets',
         },
         {
           label: 'Currencies',
-          key: 'currencies',
+          key: 'settings/currencies',
         },
         {
           label: 'Cities',
-          key: 'cities',
+          key: 'settings/cities',
         },
       ],
     },

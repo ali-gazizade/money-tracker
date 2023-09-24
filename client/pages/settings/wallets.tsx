@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import axios from 'axios';
-import { Button, Card, Input, Modal, Popconfirm, Space, Switch, Tooltip, Typography, message } from 'antd';
-import { PlusOutlined, EditOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Modal, Popconfirm, Space, Typography, message } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import Amount from '@/components/Amount';
 import AmountInterface from '@/interfaces/Amount';
 import { Currency } from './currencies';
@@ -22,12 +22,12 @@ const Wallets: React.FC = () => {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
 
   const updateList = async () => {
-    const res = await axios.get('bi/wallet/list');
+    const res = await axios.get('/bi/wallet/list');
     setList(res.data);
   }
 
   const updateCurrencies = async () => {
-    const res = await axios.get('bi/currency/list');
+    const res = await axios.get('/bi/currency/list');
     setCurrencies(res.data);
   }
 
@@ -58,7 +58,7 @@ const Wallets: React.FC = () => {
 
   const handleOk = async () => {
     if (!id) { // Create
-      await axios.post('bi/wallet/create', {
+      await axios.post('/bi/wallet/create', {
         name,
         firstTimeAmounts: initialAmounts.map(e => ({
           value: e.value,
@@ -69,7 +69,7 @@ const Wallets: React.FC = () => {
       updateList();
       setIsModalOpen(false);
     } else { // Update
-      await axios.put('bi/wallet/update/' + id, {
+      await axios.put('/bi/wallet/update/' + id, {
         name
       });
       message.success('Successfully updated');
@@ -87,7 +87,7 @@ const Wallets: React.FC = () => {
   }
 
   const confirmDelete = async (id: string) => {
-    await axios.put('bi/wallet/update/' + id, { active: false });
+    await axios.put('/bi/wallet/update/' + id, { active: false });
     message.success('Successfully deleted');
     updateList();
   };

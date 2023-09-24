@@ -8,7 +8,7 @@ import DebounceSelect from '@/components/DebounceSelect';
 import SelectValue from '@/interfaces/SelectValue';
 import Amount from '@/components/Amount';
 import AmountInterface from '@/interfaces/Amount';
-import { Currency } from './currencies';
+import { Currency } from './settings/currencies';
 import City from '@/interfaces/City';
 import TransactionType from '@/enums/TransactionType';
 
@@ -103,7 +103,7 @@ const Transactions: React.FC = () => {
   const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
   const updateList = async () => {
-    const res = await axios.get(`bi/transaction/list?page=${currentPage}&limit=${pageSize}`);
+    const res = await axios.get(`/bi/transaction/list?page=${currentPage}&limit=${pageSize}`);
     setList(res.data?.transactions);
     setTotalCount(res.data?.totalCount);
 
@@ -114,7 +114,7 @@ const Transactions: React.FC = () => {
   };
 
   const updateCurrencies = async () => {
-    const res = await axios.get('bi/currency/list');
+    const res = await axios.get('/bi/currency/list');
     setCurrencies(res.data);
 
     const defaultCurrencyId = res.data.find((e: Currency) => e.isDefault)?._id;
@@ -122,7 +122,7 @@ const Transactions: React.FC = () => {
   }
 
   const updateWalletOptions = async () => {
-    const res = await axios.get(`bi/wallet/list`);
+    const res = await axios.get(`/bi/wallet/list`);
     if (res.data) {
       const wallets: Wallet[] = res.data;
       const options = wallets.map(e => ({
@@ -150,7 +150,7 @@ const Transactions: React.FC = () => {
   };
 
   const handleOk = async () => {
-    await axios.post(`bi/transaction/create/${type.toLowerCase()}`, {
+    await axios.post(`/bi/transaction/create/${type.toLowerCase()}`, {
       from: from.value,
       to: to.value,
       amount,
@@ -176,7 +176,7 @@ const Transactions: React.FC = () => {
   }
 
   const fetchContactsList = async (value: string) => {
-    return axios.get(`bi/contact/list?page=1&limit=10&name=${value}`)
+    return axios.get(`/bi/contact/list?page=1&limit=10&name=${value}`)
       .then(res => {
         const contacts: Contact[] = res.data?.contacts;
         if (contacts) {
@@ -191,7 +191,7 @@ const Transactions: React.FC = () => {
   };
 
   const fetchCitiesList = async (value: string) => {
-    return axios.get(`bi/city/list?page=1&limit=10&name=${value}`)
+    return axios.get(`/bi/city/list?page=1&limit=10&name=${value}`)
       .then(res => {
         const cities: City[] = res.data?.cities;
         if (cities) {

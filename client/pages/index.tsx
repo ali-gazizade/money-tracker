@@ -34,16 +34,16 @@ const App: React.FC = () => {
   const [currency, setCurrency] = useState<Currency | null>(null);
 
   const updateData = async () => {
-    const totalsRes = await axios.get('bi/dashboard/totals');
+    const totalsRes = await axios.get('/bi/dashboard/totals');
     setTotalsData(totalsRes.data);
 
-    const loansRes = await axios.get('bi/dashboard/loan');
+    const loansRes = await axios.get('/bi/dashboard/loan');
     setLoansData(loansRes.data);
 
-    const defCurrencyRes = await axios.get('bi/currency/default');
+    const defCurrencyRes = await axios.get('/bi/currency/default');
     setCurrency(defCurrencyRes.data);
 
-    const walletsRes = await axios.get('bi/dashboard/wallet_list');
+    const walletsRes = await axios.get('/bi/dashboard/wallet_list');
     setWalletsData(walletsRes.data?.wallets || []);
   }
 

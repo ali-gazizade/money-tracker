@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
 
   const onFinish = async (values: any) => {
-    axios.post('bi/auth/login', values)
+    axios.post('/bi/auth/login', values)
       .then(result => {
         if(result.data.token) {
           setCookie('login', '1');

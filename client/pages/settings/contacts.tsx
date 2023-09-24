@@ -3,35 +3,24 @@ import Layout from '@/components/Layout';
 import axios from 'axios';
 import { AutoComplete, Button, Card, Input, Modal, Pagination, Popconfirm, Space, Typography, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import Contact from '@/interfaces/Contact';
 
 const { Title, Text } = Typography;
 
-interface City {
-  _id: string;
-  name: string;
-  countryName: string;
-}
-
-const Cities: React.FC = () => {
-  const [list, setList] = useState<City[]>([]);
-  const [countryOptions, setCountryOptions] = useState<{ value: string }[]>([]);
+const Contacts: React.FC = () => {
+  const [list, setList] = useState<Contact[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const [name, setName] = useState('');
-  const [countryName, setCountryName] = useState('');
-  const [modalTitle, setModalTitle] = useState('New City');
+  const [modalTitle, setModalTitle] = useState('New Contact');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
   const updateList = async () => {
-    const res = await axios.get(`bi/city/list?page=${currentPage}&limit=${pageSize}`);
-    setList(res.data?.cities);
+    const res = await axios.get(`/bi/contact/list?page=${currentPage}&limit=${pageSize}`);
+    setList(res.data?.contacts);
     setTotalCount(res.data?.totalCount);
-
-    const countryRes = await axios.get('bi/city/country_list');
-    const countryList: string[] = countryRes.data;
-    setCountryOptions(countryList.map(e => ({ value: e })));
   }
 
   useEffect(() => {
@@ -39,37 +28,35 @@ const Cities: React.FC = () => {
   }, [currentPage, pageSize]);
 
   const showCreateModal = () => {
-    setModalTitle('New City');
+    setModalTitle('New Contact');
     setId(null);
     setName('');
-    setCountryName('');
     setIsModalOpen(true);
   };
 
   const showUpdateModal = async (id: string) => {
-    setModalTitle('Update City');
-    const item: City | undefined = list.find(e => e._id === id);
+    setModalTitle('Update Contact');
+    const item: Contact | undefined = list.find(e => e._id === id);
     if (!item) {
       message.error('Item not found from the list');
       return;
     }
     setId(id);
     setName(item.name);
-    setCountryName(item.countryName);
     setIsModalOpen(true);
   };
 
   const handleOk = async () => {
     if (!id) { // Create
-      await axios.post('bi/city/create', {
-        name, countryName
+      await axios.post('/bi/contact/create', {
+        name
       });
       message.success('Successfully created');
       updateList();
       setIsModalOpen(false);
     } else { // Update
-      await axios.put('bi/city/update/' + id, {
-        name, countryName
+      await axios.put('/bi/contact/update/' + id, {
+        name
       });
       message.success('Successfully updated');
       updateList();
@@ -85,12 +72,8 @@ const Cities: React.FC = () => {
     setName(e?.target?.value);
   }
 
-  const onCountryNameChange = (e: string) => {
-    setCountryName(e);
-  }
-
   const confirmDelete = async (id: string) => {
-    await axios.put('bi/city/update/' + id, { active: false });
+    await axios.put('/bi/contact/update/' + id, { active: false });
     message.success('Successfully deleted');
     updateList();
   };
@@ -103,20 +86,10 @@ const Cities: React.FC = () => {
   return <>
     <Modal width={350} title={modalTitle} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
       <Input placeholder="Name" value={name} onChange={onNameChange} className="form-field" />
-      <AutoComplete
-        style={{ width: '100%' }}
-        filterOption={(inputValue, option) =>
-          option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-        }
-        placeholder="Country Name"
-        value={countryName}
-        options={countryOptions}
-        onChange={onCountryNameChange}
-      />
     </Modal>
     <Layout>
       <Title className="text-center" level={2}>
-        Cities
+        Contacts
         <Button size="large" className="add-btn" onClick={showCreateModal}>
           <PlusOutlined />
         </Button>
@@ -124,14 +97,7 @@ const Cities: React.FC = () => {
       <Space size={[16, 16]} wrap>
         {list.map(e => (
           <Card
-            title={
-              <Space size={[4, 4]} direction="vertical">
-                <Text>
-                  { e.name }
-                </Text>
-                <Text>{e.countryName}</Text>
-              </Space>
-            }
+            title={ e.name }
             bordered={false}
             key={e._id}
           >
@@ -163,4 +129,4 @@ const Cities: React.FC = () => {
   </>;
 };
 
-export default Cities;
+export default Contacts;

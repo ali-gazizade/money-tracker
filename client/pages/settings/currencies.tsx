@@ -17,7 +17,7 @@ const Currencies: React.FC = () => {
   const [modalTitle, setModalTitle] = useState('New Currency');
 
   const updateList = async () => {
-    const res = await axios.get('bi/currency/list');
+    const res = await axios.get('/bi/currency/list');
     setList(res.data);
   }
 
@@ -50,14 +50,14 @@ const Currencies: React.FC = () => {
 
   const handleOk = async () => {
     if (!id) { // Create
-      await axios.post('bi/currency/create', {
+      await axios.post('/bi/currency/create', {
         name, isDefault, exchangeRate
       });
       message.success('Successfully created');
       updateList();
       setIsModalOpen(false);
     } else { // Update
-      await axios.put('bi/currency/update/' + id, {
+      await axios.put('/bi/currency/update/' + id, {
         name, isDefault, exchangeRate
       });
       message.success('Successfully updated');
@@ -83,7 +83,7 @@ const Currencies: React.FC = () => {
   }
 
   const confirmDelete = async (id: string) => {
-    await axios.put('bi/currency/update/' + id, { active: false });
+    await axios.put('/bi/currency/update/' + id, { active: false });
     message.success('Successfully deleted');
     updateList();
   };
