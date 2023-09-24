@@ -29,11 +29,11 @@ const Navbar: React.FC = () => {
       children: [
         {
           label: 'Borrowings',
-          key: 'borrowings'
+          key: 'loans/borrowings'
         },
         {
           label: 'Repayments',
-          key: 'repayments'
+          key: 'loans/repayments'
         },
       ]
     },

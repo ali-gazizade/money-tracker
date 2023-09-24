@@ -124,6 +124,7 @@ router.get('/list/:type', async (req: MyRequest, res: Response) => {
 
       res.status(200).json({
         totalPages: Math.ceil(totalCount / limit),
+        totalCount,
         borrowings: borrowings.map(e => borrowingAssembler(e))
       });
     } else if (req.params.type === 'repayment') {
@@ -136,6 +137,7 @@ router.get('/list/:type', async (req: MyRequest, res: Response) => {
 
       res.status(200).json({
         totalPages: Math.ceil(totalCount / limit),
+        totalCount,
         repayments: repayments.map(e => repaymentAssembler(e))
       });
     } else {
@@ -173,6 +175,7 @@ router.get('/contact_list', async (req: MyRequest, res: Response) => {
 
     res.status(200).json({
       totalPages: Math.ceil(totalCount / limit),
+      totalCount,
       loans: loans.map(e => loanAssembler(e))
     });
   } catch (error) {
