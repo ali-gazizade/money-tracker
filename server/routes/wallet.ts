@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/list', async (req: MyRequest, res: Response) => {
   try {
     const wallets = await WalletModel.find({ user: req.user, active: true }).populate({
-      path: 'firstTimeAmounts',
+      path: 'initialAmounts',
       populate: { path: 'currency' }
     });
     res.status(200).json(wallets.map(e => walletAssembler(e)));
@@ -23,7 +23,7 @@ router.get('/list', async (req: MyRequest, res: Response) => {
 
 router.post('/create', [
   body('name').notEmpty().withMessage('Name is required'),
-  body('firstTimeAmounts').notEmpty().withMessage('First time amounts must be provided'),
+  body('initialAmounts').notEmpty().withMessage('First time amounts must be provided'),
 ], async (req: MyRequest, res: Response) => {
   try {
     const errors = validationResult(req);
@@ -31,33 +31,33 @@ router.post('/create', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, firstTimeAmounts } = req.body;
+    const { name, initialAmounts } = req.body;
 
     // Check first time amount currencies
-    for (let firstTimeAmount of firstTimeAmounts) {
-      if (!mongoose.Types.ObjectId.isValid(firstTimeAmount?.currency)) {
-        return res.status(400).json({ error: 'Invalid currency id:' + firstTimeAmount?.currency });
+    for (let initialAmount of initialAmounts) {
+      if (!mongoose.Types.ObjectId.isValid(initialAmount?.currency)) {
+        return res.status(400).json({ error: 'Invalid currency id:' + initialAmount?.currency });
       }
 
-      const currency = await CurrencyModel.findOne({ _id: firstTimeAmount.currency, user: req.user });
+      const currency = await CurrencyModel.findOne({ _id: initialAmount.currency, user: req.user });
 
       if (!currency) {
-        return res.status(404).json({ error: 'Currency not found with id:' + firstTimeAmount.currency });
+        return res.status(404).json({ error: 'Currency not found with id:' + initialAmount.currency });
       }
     }
 
     // Create the amount documents
     const amountIds: string[] = [];
-    for (let firstTimeAmount of firstTimeAmounts) {
+    for (let initialAmount of initialAmounts) {
       const savedAmount = await (new AmountModel({
-        value: firstTimeAmount.value,
-        currency: firstTimeAmount.currency,
+        value: initialAmount.value,
+        currency: initialAmount.currency,
         user: req.user
       })).save();
       amountIds.push(savedAmount._id);
     }
 
-    const wallet = new WalletModel({ name, firstTimeAmounts: amountIds, user: req.user, active: true });
+    const wallet = new WalletModel({ name, initialAmounts: amountIds, user: req.user, active: true });
     const savedWallet = await wallet.save();
 
     res.status(201).json(walletAssembler(savedWallet));
@@ -75,7 +75,7 @@ router.get('/get/:id', async (req: MyRequest, res: Response) => {
     }
     
     const wallet: Wallet | null = await WalletModel.findOne({ _id: id, user: req.user, active: true }).populate({
-      path: 'firstTimeAmounts',
+      path: 'initialAmounts',
       populate: { path: 'currency' }
     });
 

@@ -4,16 +4,16 @@ const walletAssembler = (wallet: Wallet) => {
   return {
     _id: wallet._id,
     name: wallet.name,
-    firstTimeAmounts: wallet.firstTimeAmounts.map(firstTimeAmount => ({
-      value: firstTimeAmount.value,
-      currency: !firstTimeAmount.currency
+    initialAmounts: wallet.initialAmounts.map(initialAmount => ({
+      value: initialAmount.value,
+      currency: !initialAmount.currency
       ? null
-      : typeof firstTimeAmount.currency === 'object'
+      : typeof initialAmount.currency === 'object'
         ? {
-          _id: firstTimeAmount.currency._id,
-          name: firstTimeAmount.currency.name,
+          _id: initialAmount.currency._id,
+          name: initialAmount.currency.name,
         }
-        : firstTimeAmount.currency
+        : initialAmount.currency
     }))
   };
 };

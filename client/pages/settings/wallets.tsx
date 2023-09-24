@@ -60,7 +60,7 @@ const Wallets: React.FC = () => {
     if (!id) { // Create
       await axios.post('/bi/wallet/create', {
         name,
-        firstTimeAmounts: initialAmounts.map(e => ({
+        initialAmounts: initialAmounts.map(e => ({
           value: e.value,
           currency: e.currency
         }))

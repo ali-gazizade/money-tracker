@@ -7,7 +7,7 @@ class Wallet extends BaseDocument {
   name!: string;
 
   @prop({ ref: () => Amount, type: () => [Amount], required: true })
-  firstTimeAmounts!: Ref<Amount>[];
+  initialAmounts!: Ref<Amount>[];
 
   @prop({ default: true })
   active!: boolean;

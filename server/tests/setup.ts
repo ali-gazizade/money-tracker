@@ -77,9 +77,9 @@ beforeAll(async () => {
   amounts[2] = await AmountModel.create({ value: '152.00', currency: currencies[getRandomInt(3)]._id, user: global.userId });
 
   const wallets = [];
-  wallets[0] = await WalletModel.create({ name: 'Wallet 1', firstTimeAmounts: [amounts[0], amounts[1]], user: global.userId });
-  wallets[1] = await WalletModel.create({ name: 'Wallet 2', firstTimeAmounts: [amounts[2]], user: global.userId });
-  wallets[2] = await WalletModel.create({ name: 'Wallet 3', firstTimeAmounts: [], user: global.userId });
+  wallets[0] = await WalletModel.create({ name: 'Wallet 1', initialAmounts: [amounts[0], amounts[1]], user: global.userId });
+  wallets[1] = await WalletModel.create({ name: 'Wallet 2', initialAmounts: [amounts[2]], user: global.userId });
+  wallets[2] = await WalletModel.create({ name: 'Wallet 3', initialAmounts: [], user: global.userId });
 
   const contacts = [];
   contacts[0] = await ContactModel.create({ name: 'Bravo', user: global.userId });

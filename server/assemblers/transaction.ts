@@ -6,11 +6,11 @@ import { Transfer } from '../models/transfer';
 const transactionAssembler = (transaction: Expense | Income | Transfer) => {
   return {
     _id: transaction._id,
-    type: transaction.from?.firstTimeAmounts && transaction.to?.firstTimeAmounts // From and To are wallets
+    type: transaction.from?.initialAmounts && transaction.to?.initialAmounts // From and To are wallets
       ? 'Transfer'
-      : transaction.from?.firstTimeAmounts // From is a wallet
+      : transaction.from?.initialAmounts // From is a wallet
         ? 'Expense'
-        : transaction.to?.firstTimeAmounts // To is a wallet,
+        : transaction.to?.initialAmounts // To is a wallet,
           ? 'Income'
           : 'Unknown',
     to: {

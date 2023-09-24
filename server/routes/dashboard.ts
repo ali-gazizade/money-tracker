@@ -161,21 +161,21 @@ router.get('/totals', async (req: MyRequest, res: Response) => {
   try {
     const wallets = await WalletModel.find().populate([
       {
-        path: 'firstTimeAmounts',
+        path: 'initialAmounts',
         populate: { path: 'currency' }
       }
     ]);
     const expensesByCurrency = await ExpenseModel.aggregate(totalsAggregate);
     const incomesByCurrency = await IncomeModel.aggregate(totalsAggregate);
 
-    // Calculate the sum of firstTimeAmounts first
-    let totalFirstTimeAmounts = 0;
+    // Calculate the sum of initialAmounts first
+    let totalInitialAmounts = 0;
     for (let wallet of wallets) {
-      for (let amount of wallet.firstTimeAmounts) {
-        totalFirstTimeAmounts += amount.currency._exchangeRate * amount._value;
+      for (let amount of wallet.initialAmounts) {
+        totalInitialAmounts += amount.currency._exchangeRate * amount._value;
       }
     }
-    // End Calculate the sum of firstTimeAmounts first
+    // End Calculate the sum of initialAmounts first
 
     let totalExpense = 0;
 
@@ -192,7 +192,7 @@ router.get('/totals', async (req: MyRequest, res: Response) => {
     res.status(200).json({
       expense: totalExpense.toFixed(2),
       income: totalIncome.toFixed(2),
-      balance: (totalFirstTimeAmounts + totalIncome - totalExpense).toFixed(2)
+      balance: (totalInitialAmounts + totalIncome - totalExpense).toFixed(2)
     });
   } catch (error) {
     console.error('Error retrieving contacts:', error);
@@ -233,7 +233,7 @@ router.get('/loan', async (req: MyRequest, res: Response) => {
 
 router.get('/wallet_list', async (req: MyRequest, res: Response) => {
   try {
-    const walletsRes = await WalletModel.find().populate('firstTimeAmounts');
+    const walletsRes = await WalletModel.find().populate('initialAmounts');
 
     // Add initial amounts
     const wallets: LooseObject[] = walletsRes.map(wallet => {
@@ -241,7 +241,7 @@ router.get('/wallet_list', async (req: MyRequest, res: Response) => {
         [key: string]: number
       } = {};
 
-      wallet.firstTimeAmounts.forEach(amount => {
+      wallet.initialAmounts.forEach(amount => {
         currentAmountsObj[amount.currency] = (
           currentAmountsObj[amount.currency] ? (currentAmountsObj[amount.currency] + amount._value) : amount._value
         );
