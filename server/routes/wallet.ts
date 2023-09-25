@@ -11,10 +11,12 @@ const router = express.Router();
 
 router.get('/list', async (req: MyRequest, res: Response) => {
   try {
-    const wallets = await WalletModel.find({ user: req.user, active: true }).populate({
-      path: 'initialAmounts',
-      populate: { path: 'currency' }
-    });
+    const wallets = await WalletModel.find({ user: req.user, active: true })
+      .populate({
+        path: 'initialAmounts',
+        populate: { path: 'currency' }
+      })
+      .sort({ _id: -1 });
     res.status(200).json(wallets.map(e => walletAssembler(e)));
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

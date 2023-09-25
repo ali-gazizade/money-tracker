@@ -9,7 +9,8 @@ const router = Router();
 
 router.get('/list', async (req: MyRequest, res: Response) => {
   try {
-    const currencies = await CurrencyModel.find({ user: req.user, active: true });
+    const currencies = await CurrencyModel.find({ user: req.user, active: true })
+      .sort({ _id: -1 });
     res.status(200).json(currencies.map(e => currencyAssembler(e)));
   } catch (error) {
     console.error('Error retrieving currencies:', error);

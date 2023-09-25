@@ -117,6 +117,7 @@ router.get('/list/:type', async (req: MyRequest, res: Response) => {
     if (req.params.type === 'borrowing') {
       const borrowings = await BorrowingModel.find(query)
         .populate(population)
+        .sort({ createdAt: -1 })
         .skip(skipAmount)
         .limit(limit);
 
@@ -130,6 +131,7 @@ router.get('/list/:type', async (req: MyRequest, res: Response) => {
     } else if (req.params.type === 'repayment') {
       const repayments = await RepaymentModel.find(query)
         .populate(population)
+        .sort({ createdAt: -1 })
         .skip(skipAmount)
         .limit(limit);
 
@@ -168,6 +170,7 @@ router.get('/contact_list', async (req: MyRequest, res: Response) => {
 
     const loans = await LoanModel.find(query)
       .populate(population)
+      .sort({ _id: -1 })
       .skip(skipAmount)
       .limit(limit);
 

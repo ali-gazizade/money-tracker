@@ -62,7 +62,7 @@ const columns = [
   },
 ];
 
-const Borrowings: React.FC = () => {
+const Contacts: React.FC = () => {
   const [list, setList] = useState<Loan[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(1);
@@ -100,4 +100,4 @@ const Borrowings: React.FC = () => {
   </Layout>;
 };
 
-export default Borrowings;
+export default Contacts;

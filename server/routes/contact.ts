@@ -27,6 +27,7 @@ router.get('/list', async (req: MyRequest, res: Response) => {
     }
 
     const contacts = await ContactModel.find(query)
+      .sort({ _id: -1 })
       .skip(skipAmount)
       .limit(limit);
 
