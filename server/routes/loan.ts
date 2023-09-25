@@ -156,7 +156,7 @@ router.get('/contact_list', async (req: MyRequest, res: Response) => {
 
     const skipAmount = (page - 1) * limit;
 
-    const query = { user: req.user };
+    const query = { user: req.user, 'loanAmountsToUser.0': { "$exists": true } };
 
     const population = [
       { path: 'contact' },

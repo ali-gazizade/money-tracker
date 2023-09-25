@@ -14,7 +14,7 @@ class Amount extends BaseDocument {
   }
 
   set value(newValue: string) {
-    const parsedValue = parseFloat(newValue);
+    const parsedValue = parseFloat(parseFloat(newValue).toFixed(2));
     if (!isNaN(parsedValue)) {
       this._value = parsedValue;
     }

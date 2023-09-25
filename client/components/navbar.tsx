@@ -23,17 +23,21 @@ const Navbar: React.FC = () => {
       style: { marginLeft: 'auto' },
     },
     {
-      label: 'Loans',
-      key: 'loans',
+      label: 'Loan',
+      key: 'loan',
       icon: <MoneyCollectFilled />,
       children: [
         {
           label: 'Borrowings',
-          key: 'loans/borrowings'
+          key: 'loan/borrowings'
         },
         {
           label: 'Repayments',
-          key: 'loans/repayments'
+          key: 'loan/repayments'
+        },
+        {
+          label: 'Contacts',
+          key: 'loan/contacts'
         },
       ]
     },

@@ -163,7 +163,7 @@ class Loan {
       // End Subtracting repayments
 
       for (let currencyId in loanAmountsObj) {
-        if (+loanAmountsObj[currencyId] === 0) {
+        if (+(loanAmountsObj[currencyId]).toFixed(2) == 0) {
           continue;
         }
 
