@@ -1,6 +1,16 @@
 # money-tracker
 This application is a simple solution for tracking the money transactions and loans. There are backend frontend codes inside this repository. Main technologies used in this project: Typescript, Next.js, React, Ant Design, Express.js, Mongoose.
 
+## Screenshots
+
+![image](https://github.com/ali-gazizade/money-tracker/assets/94519454/f8fa8e9e-0b74-4da8-87a4-a10af2214297)
+
+
+
+![image](https://github.com/ali-gazizade/money-tracker/assets/94519454/8dd208e8-b44c-49f1-bc60-771d2999b4cd)
+
+
+
 ## Installation
 
 Clone the repository: ```git clone https://github.com/ali-gazizade/money-tracker.git```
