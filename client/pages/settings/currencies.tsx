@@ -95,7 +95,10 @@ const Currencies: React.FC = () => {
         <Text>Default: </Text>
         <Switch checked={isDefault} onChange={onIsDefaultChange} />
       </div>
-      <Input type="number" placeholder="Exchange Rate" value={exchangeRate} onChange={onExchangeRateChange} className="form-field" />
+      <div className="form-field">
+        <Text>Exchange Rate: </Text>
+        <Input type="number" placeholder="Exchange Rate" value={exchangeRate} onChange={onExchangeRateChange} />
+      </div>
     </Modal>
     <Layout>
       <Title className="text-center" level={2}>
