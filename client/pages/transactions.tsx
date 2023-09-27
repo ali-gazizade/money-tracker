@@ -230,13 +230,13 @@ const Transactions: React.FC = () => {
         ? <DebounceSelect
           showSearch
           value={from}
-          placeholder="Select a contact"
+          placeholder="Select the contact"
           fetchOptions={fetchContactsList}
           onChange={onFromChange}
           className="form-field"
         />
         : <Select
-          placeholder="Select a wallet"
+          placeholder="Select the wallet"
           options={walletOptions}
           value={from}
           onChange={(value, e) => onFromChange(e)}
@@ -248,13 +248,13 @@ const Transactions: React.FC = () => {
         ? <DebounceSelect
           showSearch
           value={to}
-          placeholder="Select a contact"
+          placeholder="Select the contact"
           fetchOptions={fetchContactsList}
           onChange={onToChange}
           className="form-field"
         />
         : <Select
-          placeholder="Select a wallet"
+          placeholder="Select the wallet"
           options={walletOptions}
           value={to}
           onChange={(value, e) => onToChange(e)}
@@ -274,7 +274,7 @@ const Transactions: React.FC = () => {
       <DebounceSelect
         showSearch
         value={city}
-        placeholder="Select a city"
+        placeholder="Select the city"
         fetchOptions={fetchCitiesList}
         onChange={ onCityChange }
         className="form-field"

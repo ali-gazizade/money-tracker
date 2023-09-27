@@ -144,7 +144,7 @@ const Borrowings: React.FC = () => {
       <DebounceSelect
         showSearch
         value={contact}
-        placeholder="Select a contact"
+        placeholder="Select the contact"
         fetchOptions={fetchContactsList}
         onChange={onContactChange}
         className="form-field"
