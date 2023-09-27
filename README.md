@@ -77,4 +77,4 @@ If you or a contact repaid the borrowed money, then go to Loan->Repayments and a
 
 Note: Borrowings, Repayments are not like Transactions. Let's see an example: You paid your contact's restaurant bill and you wanna add it as a borrowing. Then just add a borrowing without any additional transaction. But if your contact borrowed money and you gave him the money from your wallet, then you also have to create an expense. The same thing is applied to Repayments.
 
-Total loans will be displayed in the dashboard. If you wanna see the loans for each contact, then go to Loan->Contacts page.
+Total loan amounts will be displayed in the dashboard. If you wanna see the loans for each contact, then go to Loan->Contacts page.
