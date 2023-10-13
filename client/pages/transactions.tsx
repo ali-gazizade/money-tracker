@@ -225,6 +225,15 @@ const Transactions: React.FC = () => {
 
   return <>
     <Modal width={350} title={`New ${type}`} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+      <div className="text-center">
+        <Amount
+          value={amount.value}
+          currencies={currencies}
+          selectedCurrencyId={amount.currency}
+          onValueChange={value => setAmount({ ...amount, value: value || '0' })} // Value always number, if null then 0
+          onCurrencyChange={currency => setAmount({ ...amount, currency: currency })}
+        />
+      </div>
       <Text strong>From: </Text>
       { type === TransactionType.Income
         ? <DebounceSelect
@@ -261,15 +270,6 @@ const Transactions: React.FC = () => {
           className="form-field"
         />
       }
-      <div className="text-center">
-        <Amount
-          value={amount.value}
-          currencies={currencies}
-          selectedCurrencyId={amount.currency}
-          onValueChange={value => setAmount({ ...amount, value: value || '0' })} // Value always number, if null then 0
-          onCurrencyChange={currency => setAmount({ ...amount, currency: currency })}
-        />
-      </div>
       <Text strong>City: </Text>
       <DebounceSelect
         showSearch

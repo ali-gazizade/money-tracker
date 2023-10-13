@@ -335,7 +335,7 @@ router.get('/wallet_list', async (req: MyRequest, res: Response) => {
       Object.keys(wallet.currentAmountsObj).forEach((k: string) => {
         wallet.currentAmounts.push({
           currencyId: k,
-          total: wallet.currentAmountsObj[k]
+          total: wallet.currentAmountsObj[k].toFixed(2)
         });
       });
 
