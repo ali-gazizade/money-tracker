@@ -18,7 +18,8 @@
     "start": "ts-node ./app.ts",
     "dev": "nodemon ./app.ts",
     "test": "jest --runInBand",
-    "setup": "ts-node ./scripts/setup.ts"
+    "setup": "ts-node ./scripts/setup.ts",
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
